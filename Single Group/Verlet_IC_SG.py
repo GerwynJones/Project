@@ -15,19 +15,18 @@ from numpy import linalg as LA
 
 " Size "
 AU = sc.astronomical_unit
-R = (200/np.sqrt(3))*AU
+R = 200*AU
 
 " No.Of.Stars "
-
-N = 3 
+N = 4 
 
 " Mass "
 M0 = 1.989e30
-M1 = 10*M0
-M2 = 2*M0
-M3 = 5*M0
+Mass = np.zeros(N)
 
-mass = np.array([M1,M2,M3])
+for i in range(N):
+    M = M0    
+    Mass[i] = np.array([M])
 
 " Duration "
 
@@ -38,68 +37,68 @@ t_max = 1000*Year; t = 0; dt_max = Year/10
 
 " Constants "
 
-e = 0.05*AU; n = 1e-3; c = 1000
+e = 0.05*AU; n = 1e-3
 
 ############################################
 
-pos = np.zeros((N,3))
-vel = np.zeros((N,3))
+Pos = np.zeros((N,3))
+Vel = np.zeros((N,3))
 
 for i in range(N):
     
-    X, Y, Z = np.random.uniform(-1,1,3)
+    phi = np.random.uniform(0, 2*np.pi)
+    theta = np.random.uniform(0, np.pi)
     
-    pos[i] = np.array([X*R,Y*R,Z*R])
+    X = R * np.sin(theta) * np.cos(phi)
+    Y = R * np.sin (theta) * np.sin(phi)
+    Z = R * np.cos(theta)
+    
+    Pos[i] = np.array([X,Y,Z])
 
     Vx, Vy, Vz = np.random.uniform(-1,1,3)
 
-    vel[i] = np.array([Vx * c, Vy * c, Vz * c])
+    Vel[i] = np.array([Vx, Vy, Vz])
 
-def PE(pos, mass, e):
+def PE(Pos, Mass, e):
     
-    pe = np.zeros((N,1))
+    Pe = np.zeros((N,1))
     G = sc.gravitational_constant    
     
     for i in range(0,N-1):
         for j in range(i+1,N):     
             
-            r = pos[i]-pos[j]
+            r = Pos[i]-Pos[j]
             m = LA.norm(r)
             
-            pe[i] += -(G*mass[i]*mass[j])/(m+e) # Check PE
-            pe[j] += -(G*mass[j]*mass[i])/(m+e)
+            Pe[i] += -(G*Mass[i]*Mass[j])/(m+e) # Check Pe
+            Pe[j] += -(G*Mass[j]*Mass[i])/(m+e)
 
-    return pe
+    return Pe
 
-
-def KE(vel, mass):
+def KE(Vel, Mass):
     
-    ke = np.zeros((N,1))
+    Ke = np.zeros((N,1))
     
     for i in range(0,N):
-        vi = LA.norm(vel[i])        
-        ke[i] = .5*mass[i]*vi**2
+        vi = LA.norm(Vel[i])        
+        Ke[i] = .5*Mass[i]*vi**2
 
-    return ke
+    return Ke
 
-Pos1,Pos2,Pos3 = pos
-V1,V2,V3 = vel
-P1,P2,P3 = -PE(pos, mass, e)
-K1,K2,K3 = KE(vel, mass)
-
-def normv(vel, pos, mass, PE):
+def NormV(Vel, Pos, Mass, PE):
     
-    Ptot = np.sum(-PE(pos, mass, e))        
+    Ptot = np.sum(-PE(Pos, Mass, e))        
     
-    Ktot = np.sum(KE(vel, mass))    
+    Ktot = np.sum(KE(Vel, Mass))    
     
-    A = Ktot/Ptot
+    A = (2*Ktot)/Ptot
     
-    v = vel/np.sqrt(A)    
+    V = Vel/np.sqrt(A)    
     
-    return v, Ktot, Ptot
+    return V, Ptot
     
-v, Ktot, Ptot = normv(vel, pos, mass, PE)    
+Vel, Ptot = NormV(Vel, Pos, Mass, PE)
+Ktot = np.sum(KE(Vel, Mass))    
     
    
     

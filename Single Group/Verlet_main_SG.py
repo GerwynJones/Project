@@ -10,98 +10,111 @@ import numpy as np
 import scipy.constants as sc
 from numpy import linalg as LA
 
-from Verlet_IC_SG import *
+from Verlet_IC_MG_Zero import *
 
 ##################################################
 
-
-def Verp(ovel, opos, dt, a):
+def Verp(oVel, oPos, dt, acc):
     "Position:"
-    pos = opos + ovel*dt + .5*a*dt**2
-    return pos
+    Pos = oPos + oVel*dt + .5*acc*dt**2
+    return Pos
     
     
-def Verv(pos, mass, ovel, dt, a, e):
+def Verv(Pos, Mass, oVel, dt, acc, e):
      "Velocities:"
-     an, pe = acc(pos, mass, ovel, e)
-     vel = ovel + .5*(a + an)*dt
-     return vel
+     anew, pe = Acc(Pos, Mass, oVel, e)
+     Vel = oVel + .5*(acc + anew)*dt
+     return Vel
 
 
-def acc(pos, mass, vel, e):
+def Acc(Pos, Mass, Vel, e):
     
-    a = np.zeros((N,3))
-    pe = np.zeros((N,1))
-    
+    acc = np.zeros((N,3))
+    Pe = np.zeros((N,1))
     G = sc.gravitational_constant
     
     for i in range(0,N-1):
         for j in range(i+1,N):
             
-            r = pos[i]-pos[j]
+            r = Pos[i] - Pos[j]
             m = LA.norm(r)
             F = (G/(m+e)**3)*r # check (m+e) part
             
-            a[i] += -F*mass[j]
-            a[j] += F*mass[i]
-            pe[i] += -(G*mass[i]*mass[j])/(m+e) # Check PE
-            pe[j] += -(G*mass[j]*mass[i])/(m+e)
+            acc[i] += -F*Mass[j]
+            acc[j] += F*Mass[i]
+            Pe[i] += -(G*Mass[i]*Mass[j])/(m+e) # Check PE
+            Pe[j] += -(G*Mass[j]*Mass[i])/(m+e)
 
-    return a, pe
+    return acc, Pe
 
+
+def KE(Vel, Mass):
+    
+    Ke = np.zeros((N,1))
+    
+    for i in range(0,N):
+        vi = LA.norm(Vel[i])        
+        Ke[i] = .5*Mass[i]*vi**2
+
+    return Ke
 
 #############################################
 
 a = []; Ta = []
 b = []; Tb = []
 c = []; Tc = []
+d = []; Td = []
 
 Tsum = []
 
 T = []; dT = []
 
 
-t = 0; acs = []
+t = 0; ac = []
 
 ############################################
 
 while t < t_max:   
     
-    ac, pe = acc(pos, mass, vel, e)
+    acc, Pe = Acc(Pos, Mass, Vel, e)
     
-    ke = KE(vel,mass)
+    Ke = KE(Vel,Mass)
     
-    a_o = (LA.norm(ac, axis = 1)); acs.append(a_o); acceleration = np.asarray(acs)
+    norm_a = (LA.norm(acc, axis = 1)); ac.append(norm_a); acceleration = np.asarray(ac)
     
-    dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(a_o))])
+    dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(norm_a))])
 
     print(t/t_max)*100 
     T.append(t + dt_grav)
     dT.append(dt_grav)    
     
     "Verlet Method"
-    opos = pos; ovel = vel
+    oPos = Pos; oVel = Vel
 
-    pos = Verp(ovel, opos, dt_grav, ac)
-    vel = Verv(pos, mass, ovel, dt_grav, ac, e)
+    Pos = Verp(oVel, oPos, dt_grav, acc)
+    Vel = Verv(Pos, Mass, oVel, dt_grav, acc, e)
 
     t += dt_grav
     
-    """Dump pos into file"""
-    a.append(pos[0]/AU)
+    """Dump Pos into file"""
+    a.append(Pos[0]/AU)
     A = np.asarray(a)
-    b.append(pos[1]/AU)
+    b.append(Pos[1]/AU)
     B = np.asarray(b)
-    c.append(pos[2]/AU)
+    c.append(Pos[2]/AU)
     C = np.asarray(c)
+    d.append(Pos[3]/AU)
+    D = np.asarray(d)
     """Dump energies into file"""
-    Ta.append(pe[0] + ke[0])
+    Ta.append(Ke[0]/2 + Pe[0])
     Ea = np.asarray(Ta)
-    Tb.append(pe[1] + ke[1])
+    Tb.append(Ke[1]/2 + Pe[1])
     Eb = np.asarray(Tb)
-    Tc.append(pe[2] + ke[2])
+    Tc.append(Ke[2]/2 + Pe[2])
     Ec =  np.asarray(Tc)
-    Tsum.append(pe[0] + ke[0] + pe[1] + ke[1] + pe[2] + ke[2])
+    Td.append(Ke[3]/2 + Pe[3])
+    Ed =  np.asarray(Td)
+    Tsum.append(Pe[0] + Ke[0]/2 + Pe[1] + Ke[1]/2 + Pe[2] + Ke[2]/2 + Pe[3] + Ke[3]/2)
     Esum =  np.asarray(Tsum)
     
     if t == t_max:
