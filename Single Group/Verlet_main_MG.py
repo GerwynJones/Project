@@ -28,7 +28,7 @@ def Verv(Pos, Mass, oVel, dt, acc, e):
 
 
 def Acc(Pos, Mass, Vel, e):
-    
+    "Acceleration:"
     acc = np.zeros((Ns,3))
     Pe = np.zeros(Ns)
     G = sc.gravitational_constant
@@ -60,17 +60,8 @@ def KE(Vel, Mass):
 
 #############################################
 
-a = []; Ta = []
-b = []; Tb = []
-c = []; Tc = []
-d = []; Td = []
-
-Tsum = []
-
+P = []; A = []
 T = []; dT = []
-
-
-t = 0; ac = []
 
 ############################################
 
@@ -80,15 +71,14 @@ while t < t_max:
     
     Ke = KE(Vel,Mass)
     
-    norm_a = (LA.norm(acc, axis = 1)); ac.append(norm_a); acceleration = np.asarray(ac)
+    a = (LA.norm(acc, axis = 1))
     
-    dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(norm_a))])
+    dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(a))])
 
     print(t/t_max)*100 
-    T.append(t + dt_grav)
-    dT.append(dt_grav)    
-    
+
     "Verlet Method"
+    
     oPos = Pos; oVel = Vel
 
     Pos = Verp(oVel, oPos, dt_grav, acc)
@@ -96,27 +86,12 @@ while t < t_max:
 
     t += dt_grav
     
-    """Dump Pos into file"""
-    a.append(Pos[0]/AU)
-    A = np.asarray(a)
-    b.append(Pos[1]/AU)
-    B = np.asarray(b)
-    c.append(Pos[2]/AU)
-    C = np.asarray(c)
-    d.append(Pos[3]/AU)
-    D = np.asarray(d)
-    """Dump energies into file"""
-    Ta.append(Ke[0]/2 + Pe[0])
-    Ea = np.asarray(Ta)
-    Tb.append(Ke[1]/2 + Pe[1])
-    Eb = np.asarray(Tb)
-    Tc.append(Ke[2]/2 + Pe[2])
-    Ec =  np.asarray(Tc)
-    Td.append(Ke[3]/2 + Pe[3])
-    Ed =  np.asarray(Td)
-    Tsum.append(Pe[0] + Ke[0]/2 + Pe[1] + Ke[1]/2 + Pe[2] + Ke[2]/2 + Pe[3] + Ke[3]/2)
-    Esum =  np.asarray(Tsum)
+    """Dump Data into file"""
+    
+    P.append(Pos)
+    A.append(a)
+    T.append(t + dt_grav)
+    dT.append(dt_grav)    
     
     if t == t_max:
         break
-    

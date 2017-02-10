@@ -19,7 +19,7 @@ PC = 206265*AU
 R = 200*AU
 
 " No.Of.Stars "
-N = 1000
+N = 11
 
 " Mass "
 M0 = 1.989e30
@@ -52,30 +52,41 @@ def GroupPos(N):
     
     R = 0.1*PC    
     
+    i = -1
     a = -2
     
-    for i in range(N):
+    while True:
         
-        if Pos[i-1,0] <= (PC-C):
-            a = a + 1            
-            phi = np.random.uniform(0, 2*np.pi)
-            theta = np.random.uniform(0, np.pi)
+        i = i + 1
+        
+        if i == (N):
+            break
+        
+        elif Pos[i-1,0] <= (PC-C):
+            a = a + 1    
             
-            X = (a * C) +  np.random.normal(C, A)
-            Y = R * np.sin (theta) * np.sin(phi)
-            Z = R * np.sin(theta) * np.cos(phi)
+            D = np.random.uniform(0, R**2)
+            phi = np.random.uniform(0, 2*np.pi)           
+            
+            X = (a * C) + np.random.normal(C, A)
+            Y = np.sqrt(D) * np.cos(phi)
+            Z = np.sqrt(D) * np.sin(phi)
             
             Pos[i] = np.array([X,Y,Z])
-        if Pos[i-1,0] > (PC-C) :
-            a = -1
+
+            
+        elif Pos[i-1,0] > (PC-C):
+            a = - 1
+            
+            D = np.random.uniform(0, R**2)
             phi = np.random.uniform(0, 2*np.pi)
-            theta = np.random.uniform(0, np.pi)
             
             X = np.random.normal(0, A)
-            Y = R * np.sin (theta) * np.sin(phi)
-            Z = R * np.sin(theta) * np.cos(phi)
+            Y = np.sqrt(D) * np.cos(phi)
+            Z = np.sqrt(D) * np.sin(phi)
             
             Pos[i] = np.array([X,Y,Z])
+
             
     return Pos
 
@@ -100,7 +111,7 @@ def GroupVel(N):
     return Vel
     
     
-Vel = GroupVel(N)
+#Vel = GroupVel(N)
 Pos = GroupPos(N)
 
 

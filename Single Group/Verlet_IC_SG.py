@@ -18,7 +18,7 @@ AU = sc.astronomical_unit
 R = 200*AU
 
 " No.Of.Stars "
-N = 4 
+N = 10
 
 " Mass "
 M0 = 1.989e30
@@ -44,21 +44,32 @@ e = 0.05*AU; n = 1e-3
 Pos = np.zeros((N,3))
 Vel = np.zeros((N,3))
 
-for i in range(N):
-    
-    phi = np.random.uniform(0, 2*np.pi)
-    theta = np.random.uniform(0, np.pi)
-    
-    X = R * np.sin(theta) * np.cos(phi)
-    Y = R * np.sin (theta) * np.sin(phi)
-    Z = R * np.cos(theta)
-    
-    Pos[i] = np.array([X,Y,Z])
+i = -1
 
-    Vx, Vy, Vz = np.random.uniform(-1,1,3)
+while True:
+    
+    i = i + 1
 
-    Vel[i] = np.array([Vx, Vy, Vz])
+    X = np.random.uniform(-R, R)
+    Y = np.random.uniform(-R, R)
+    Z = np.random.uniform(-R, R)
+    
+    if i == (N):
+        break
+    
+    elif np.sqrt(X**2 + Y**2 + Z**2) <= R:
 
+        Pos[i] = np.array([X,Y,Z])
+        
+        Vx, Vy, Vz = np.random.uniform(-1,1,3)
+
+        Vel[i] = np.array([Vx, Vy, Vz])
+        
+    elif np.sqrt(X**2 + Y**2 + Z**2) > R:
+       i = i - 1
+
+#############################################
+            
 def PE(Pos, Mass, e):
     
     Pe = np.zeros((N,1))
@@ -100,6 +111,7 @@ def NormV(Vel, Pos, Mass, PE):
 Vel, Ptot = NormV(Vel, Pos, Mass, PE)
 Ktot = np.sum(KE(Vel, Mass))    
     
+
    
     
     
