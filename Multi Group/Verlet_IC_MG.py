@@ -19,7 +19,7 @@ PC = 206265*AU
 R = 200*AU
 
 " No.Of.groups "
-Ng = 2
+Ng = 3
 
 " Duration "
 Year = 365.26*(24*60*60)*(1.001)

@@ -15,13 +15,20 @@ plt.close('all')
 
 Position = np.zeros((Ns,len(P),3))
 Acceleration = np.zeros((Ns,len(P)))
+Energy = np.zeros((Ns,len(P)))
+Esum = np.zeros((Ng,len(P)))
 Time = np.zeros(len(P))
 
 for j in range(len(P)):
     for i in range(Ns):
-        Position[i][j,:] = P[j][i,:] 
-        Acceleration[i,j] = A[j][i]
-        Time[j] = T[j]
+        O = np.zeros(Ng)
+        for k in range(Ng):
+            O[k] = O[k-1] + N[k]
+            Position[i][j,:] = P[j][i,:] 
+            Acceleration[i,j] = A[j][i]
+            Energy[i,j] = E[j][i]
+            Esum[k,j] = np.sum(E[j][O[k-1]:O[k]])
+            Time[j] = T[j]
         
         
 fig = plt.figure(1)
@@ -33,14 +40,7 @@ for i in range(Ns):
 plt.xlabel("x")
 plt.legend(loc = 'best')
 
-
-#plt.figure(2)
-#plt.plot(T, Ea/Esum, label="1"), plt.plot(T, Eb/Esum, label="2"); plt.plot(T, ((Ea + Eb + Ec + Ed)/Esum), color = 'black') ; plt.plot(T, Ec/Esum, label="3"); plt.plot(T, Ed/Esum, label="4")
-#plt.legend(loc = 'best')
-#plt.savefig('Graph of Energy SG.png', bbox_inches='tight')
-
-
-plt.figure(3)
+plt.figure()
 
 for i in range(Ns):    
     plt.plot(Position[i][:,0],Position[i][:,1]) 
@@ -50,7 +50,20 @@ plt.xlabel(r'Distance $(AU)$')
 plt.savefig('Graph of 2D MG.png', bbox_inches='tight') 
 plt.legend(loc = 'best')
 
-plt.figure(2)
+O = np.zeros(Ng)
+for k in range(Ng):
+    plt.figure()
+    for i in range(int(N[k])):
+        O[k] = O[k-1] + N[k]
+        i = i + O[k-1] 
+        plt.plot(Energy[i]/Esum[k])
+        
+    plt.legend(loc = 'best')
+    
+plt.savefig('Graph of Energy MG.png', bbox_inches='tight')
+
+
+plt.figure()
 
 for i in range(Ns):    
     plt.plot(T, Acceleration[i,:])

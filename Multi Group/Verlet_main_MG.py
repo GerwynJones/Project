@@ -50,7 +50,7 @@ def Acc(Pos, Mass, Vel, e):
 
 def KE(Vel, Mass):
     
-    Ke = np.zeros((Ns,1))
+    Ke = np.zeros(Ns)
     
     for i in range(0,Ns):
         vi = LA.norm(Vel[i])        
@@ -60,7 +60,7 @@ def KE(Vel, Mass):
 
 #############################################
 
-P = []; A = []
+P = []; A = []; E = []
 T = []; dT = []
 
 ############################################
@@ -85,6 +85,7 @@ while t < t_max:
     Vel = Verv(Pos, Mass, oVel, dt_grav, acc, e)
 
     t += dt_grav
+    TE = Ke + Pe
     
     """Dump Data into file"""
     
@@ -92,6 +93,7 @@ while t < t_max:
     A.append(a)
     T.append(t + dt_grav)
     dT.append(dt_grav)    
+    E.append(TE)  
     
     if t == t_max:
         break
