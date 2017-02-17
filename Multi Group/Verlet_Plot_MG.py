@@ -16,20 +16,16 @@ plt.close('all')
 Position = np.zeros((Ns,len(P),3))
 Acceleration = np.zeros((Ns,len(P)))
 Energy = np.zeros((Ns,len(P)))
-Esum = np.zeros((Ng,len(P)))
+Esum = np.sum(KinE + PotE)
 Time = np.zeros(len(P))
 
 for j in range(len(P)):
     for i in range(Ns):
-        O = np.zeros(Ng)
-        for k in range(Ng):
-            O[k] = O[k-1] + N[k]
-            Position[i][j,:] = P[j][i,:] 
-            Acceleration[i,j] = A[j][i]
-            Energy[i,j] = E[j][i]
-            Esum[k,j] = np.sum(E[j][O[k-1]:O[k]])
-            Time[j] = T[j]
-        
+        Position[i][j,:] = P[j][i,:] 
+        Acceleration[i,j] = A[j][i]
+        Energy[i,j] = E[j][i]
+        Time[j] = T[j]
+    
         
 fig = plt.figure(1)
 ax = fig.add_subplot(111, projection='3d')          
@@ -50,13 +46,13 @@ plt.xlabel(r'Distance $(AU)$')
 plt.savefig('Graph of 2D MG.png', bbox_inches='tight') 
 plt.legend(loc = 'best')
 
-O = np.zeros(Ng)
+O = np.zeros(Ng+1)
 for k in range(Ng):
     plt.figure()
     for i in range(int(N[k])):
         O[k] = O[k-1] + N[k]
         i = i + O[k-1] 
-        plt.plot(Energy[i]/Esum[k])
+        plt.plot(Energy[i]/Esum)
         
     plt.legend(loc = 'best')
     

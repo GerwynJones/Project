@@ -75,8 +75,6 @@ while t < t_max:
     
     dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(a))])
 
-    print(t/t_max)*100 
-
     "Verlet Method"
     
     oPos = Pos; oVel = Vel

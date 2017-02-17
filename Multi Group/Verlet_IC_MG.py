@@ -19,7 +19,7 @@ PC = 206265*AU
 R = 200*AU
 
 " No.Of.groups "
-Ng = 3
+Ng = 2
 
 " Duration "
 Year = 365.26*(24*60*60)*(1.001)
@@ -129,7 +129,7 @@ def GroupV(Ng):
     
 def PE(Pos, Mass, e, N):
     
-    Pe = np.zeros((N,1))
+    Pe = np.zeros(N)
     G = sc.gravitational_constant    
     
     for i in range(0,N-1):
@@ -145,7 +145,7 @@ def PE(Pos, Mass, e, N):
 
 def KE(Vel, Mass, N):
     
-    Ke = np.zeros((N,1))
+    Ke = np.zeros(N)
     
     for i in range(0,N):
         vi = LA.norm(Vel[i])        
@@ -161,7 +161,9 @@ def NormV(Vel, Pos, Mass, PE, N):
     
     A = (2*Ktot)/Ptot
     
-    V = Vel/np.sqrt(A)    
+    l = np.random.uniform(0.9, 1)
+    
+    V = l*Vel/np.sqrt(A)    
     
     return V
 
@@ -171,6 +173,8 @@ def IC(Ns, Ng, R):
     
     Pos = np.zeros((Ns,3))
     V = []
+    K = []
+    P = []
     Mass = np.zeros(Ns)
     
     O = -1
@@ -184,7 +188,6 @@ def IC(Ns, Ng, R):
         mass = M(a)
         
         while i < a:
-            
             i = i + 1
             O = O + 1
             
@@ -197,7 +200,6 @@ def IC(Ns, Ng, R):
                 break
                  
             elif np.sqrt(X**2 + Y**2 + Z**2) <= R:
-                
                 pos[i] = np.array([X,Y,Z])
                 Pos[O] = pos[i] + GroupPos[j]
                 
@@ -215,9 +217,12 @@ def IC(Ns, Ng, R):
     
         v = NormV(vel, pos, mass, PE, a) + GroupVel[j]
         
+        K.append(np.sum(KE(v, mass, a)))
+        P.append(np.sum(PE(pos, mass, e, a))) 
+        
         V.append(v)
     
-    return Pos, V, Mass
+    return Pos, V, Mass, K, P
         
 
 def IV(V, Ng, Ns):
@@ -239,7 +244,7 @@ def IV(V, Ng, Ns):
  
 GroupPos, Ns, N = GroupP(Ng)           
 
-Pos, V, Mass = IC(Ns, Ng, R)
+Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R)
 
 Vel = IV(V, Ng, Ns)
     
