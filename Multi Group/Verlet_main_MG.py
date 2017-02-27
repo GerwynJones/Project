@@ -63,9 +63,12 @@ def KE(Vel, Mass):
 P = []; A = []; E = []
 T = []; dT = []
 
+O = 0 
+
 ############################################
 
 while t < t_max:   
+    O = O + 1
     
     acc, Pe = Acc(Pos, Mass, Vel, e)
     
@@ -84,14 +87,17 @@ while t < t_max:
 
     t += dt_grav
     TE = Ke + Pe
+
+    if O == Dump :   
+        """Dump Data into file"""
     
-    """Dump Data into file"""
-    
-    P.append(Pos)
-    A.append(a)
-    T.append(t + dt_grav)
-    dT.append(dt_grav)    
-    E.append(TE)  
+        P.append(Pos)
+        A.append(a)
+        T.append(t + dt_grav)
+        dT.append(dt_grav)    
+        E.append(TE)  
+        
+        O = 0
     
     if t == t_max:
         break

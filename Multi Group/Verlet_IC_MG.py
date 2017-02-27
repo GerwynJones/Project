@@ -19,7 +19,10 @@ PC = 206265*AU
 R = 200*AU
 
 " No.Of.groups "
-Ng = 2
+Ng = 1
+
+" Dumping Number"
+Dump = 50
 
 " Duration "
 Year = 365.26*(24*60*60)*(1.001)
@@ -247,13 +250,5 @@ GroupPos, Ns, N = GroupP(Ng)
 Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R)
 
 Vel = IV(V, Ng, Ns)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
+ 
+ 
