@@ -13,6 +13,9 @@ from numpy import linalg as LA
 
 " Defining Variables "
 
+cdef double AU, PC, R, Year, t_max, dt_max
+cdef int Ng, Dump, t
+
 " Size "
 AU = sc.astronomical_unit
 PC = 206265*AU
@@ -38,8 +41,8 @@ e = 0.05*AU; n = 1e-2
 def M(int N):
 
     cdef int i, M0
+    cdef double Mass
 
-    Mass = np.zeros(N)
     " Mass "
     M0 = 1.989e30
     Mass = np.zeros(N)
@@ -52,16 +55,15 @@ def M(int N):
 
 def GroupP(int Ng):
 
-    cdef int i, C, A, R, O, Ns
+    cdef int i, O, Ns
+    cdef double GrouPos, N, S, D, phi, X, Y, Z, C, A, R
     
     GroupPos = np.zeros((Ng,3))
     
     N = np.zeros(Ng)
     
     C = 20000*AU
-    
     A = 1000*AU    
-    
     R = 0.1*PC    
     
     i = -1
@@ -117,7 +119,8 @@ def GroupP(int Ng):
 
 def GroupV(int Ng):
 
-    cdef int i, C
+    cdef int i, Vgroup
+    cdef double Vel, V, Vx, Vy, Vz, C
     
     Vel = np.zeros((Ng,3))
     V = np.zeros(Ng)
