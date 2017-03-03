@@ -20,21 +20,21 @@ def Verp(oVel, oPos, dt, acc):
     return Pos
     
     
-def Verv(Pos, Mass, oVel, dt, acc, e):
+def Verv(Pos, Mass, oVel, dt, acc, e, Ns):
      "Velocities:"
-     anew, pe = Acc(Pos, Mass, oVel, e)
+     anew, pe = Acc(Pos, Mass, oVel, e, Ns)
      Vel = oVel + .5*(acc + anew)*dt
      return Vel
 
 
-def Acc(Pos, Mass, Vel, e):
+def Acc(Pos, Mass, Vel, e, Ns):
     "Acceleration:"
     acc = np.zeros((Ns,3))
     Pe = np.zeros(Ns)
     G = sc.gravitational_constant
     
-    for i in range(0,Ns-1):
-        for j in range(i+1,Ns):
+    for i in range(0, Ns-1):
+        for j in range(i+1, Ns):
             
             r = Pos[i] - Pos[j]
             m = LA.norm(r)
@@ -48,7 +48,7 @@ def Acc(Pos, Mass, Vel, e):
     return acc, Pe
 
 
-def KE(Vel, Mass):
+def KE(Vel, Mass, Ns):
     
     Ke = np.zeros(Ns)
     
@@ -70,9 +70,9 @@ O = 0
 while t < t_max:   
     O = O + 1
     
-    acc, Pe = Acc(Pos, Mass, Vel, e)
+    acc, Pe = Acc(Pos, Mass, Vel, e, Ns)
     
-    Ke = KE(Vel,Mass)
+    Ke = KE(Vel, Mass, Ns)
     
     a = (LA.norm(acc, axis = 1))
     
@@ -83,7 +83,7 @@ while t < t_max:
     oPos = Pos; oVel = Vel
 
     Pos = Verp(oVel, oPos, dt_grav, acc)
-    Vel = Verv(Pos, Mass, oVel, dt_grav, acc, e)
+    Vel = Verv(Pos, Mass, oVel, dt_grav, acc, e, Ns)
 
     t += dt_grav
     TE = Ke + Pe

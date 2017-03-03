@@ -25,23 +25,22 @@ def Verp(double oVel, double oPos, double dt, double acc):
     return Pos
     
     
-def Verv(double Pos, double Mass, double oVel, double dt, double acc, int e):
+def Verv(double Pos, double Mass, double oVel, double dt, double acc, int e, int Ns):
     cdef double anew, pe, Vel
     "Velocities:"
-    anew, pe = Acc(double Pos, double Mass, double oVel, int e)
+    anew, pe = Acc(double Pos, double Mass, double oVel, int e, int Ns)
     Vel = oVel + .5*(acc + anew)*dt
     return Vel
 
 
-def Acc(double Pos, double Mass, double Vel, int e):
+def Acc(double Pos, double Mass, double Vel, int e, int Ns):
     
-    cdef int G, i, j
-    cdef np.ndarray[np.double_t, ndim=2] acc
-    cdef np.ndarray[np.double_t, ndim=1] Pe
+    cdef int i, j
+    cdef double G, r, m, F
+    cdef np.ndarray[np.double_t, ndim=2] acc = np.zeros((Ns,3) dtype=np.double)
+    cdef np.ndarray[np.double_t] Pe = np.zeros((Ns,) dtype=np.double)
 
     "Acceleration:"
-    acc = np.zeros((Ns,3) dtype=np.double)
-    Pe = np.zeros(Ns)
     G = sc.gravitational_constant
     
     for i in range(0,Ns-1):
@@ -59,12 +58,10 @@ def Acc(double Pos, double Mass, double Vel, int e):
     return acc, Pe
 
 
-def KE(double Vel, double Mass):
+def KE(double Vel, double Mass, int Ns):
     
     cdef double vi
-    cdef np.ndarray[np.double_t, ndim=2] Ke
-
-    Ke = np.zeros(Ns)
+    cdef np.ndarray[np.double_t] Ke = np.zeros((Ns,), dtype=np.double)
     
     for i in range(0,Ns):
         vi = LA.norm(Vel[i])        
@@ -74,49 +71,47 @@ def KE(double Vel, double Mass):
 
 ############################################
 
-def Loop(t, t_max) :
+P = []; A = []; E = []
+T = []; dT = []    
+
+cdef int O = 0
+cdef double a, dt_grav, oPos, oVel, TE, acc, Pe, Ke 
+
+while t < t_max:    
+    O = O + 1
     
-    P = []; A = []; E = []
-    T = []; dT = []    
+    acc, Pe = Acc(Pos, Mass, Vel, e, Ns)
     
-    cdef int O
-    O = 0
+    Ke = KE(Vel, Mass, Ns)
     
-    while t < t_max:   
-        O = O + 1
-        
-        acc, Pe = Acc(Pos, Mass, Vel, e)
-        
-        Ke = KE(Vel,Mass)
-        
-        cdef double a, dt_grav, oPos, oVel, TE
-        
-        a = (LA.norm(acc, axis = 1))
-        
-        dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(a))])
+    cdef double a, dt_grav, oPos, oVel, TE
     
-        "Verlet Method"
-        
-        oPos = Pos; oVel = Vel
+    a = (LA.norm(acc, axis = 1))
     
-        Pos = Verp(oVel, oPos, dt_grav, acc)
-        Vel = Verv(Pos, Mass, oVel, dt_grav, acc, e)
+    dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(a))])
+
+    "Verlet Method"
     
-        t += dt_grav
-        TE = Ke + Pe
+    oPos = Pos; oVel = Vel
+
+    Pos = Verp(oVel, oPos, dt_grav, acc)
+    Vel = Verv(Pos, Mass, oVel, dt_grav, acc, e, Ns)
+
+    t += dt_grav
+    TE = Ke + Pe
+
+    if O == Dump :   
+        """Dump Data into file"""
     
-        if O == Dump :   
-            """Dump Data into file"""
+        P.append(Pos)
+        A.append(a)
+        T.append(t + dt_grav)
+        dT.append(dt_grav)    
+        E.append(TE)  
         
-            P.append(Pos)
-            A.append(a)
-            T.append(t + dt_grav)
-            dT.append(dt_grav)    
-            E.append(TE)  
-            
-            O = 0
-        
-        if t == t_max:
-            break
-        
-        return P, A, T, dT, E
+        O = 0
+    
+    if t == t_max:
+        break
+    
+

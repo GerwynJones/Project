@@ -6,14 +6,20 @@ Created on Thu Nov 24 22:29:44 2016
 """
 from __future__ import division
 import numpy as np 
+cimport numpy as np 
 import scipy.constants as sc
 from numpy import linalg as LA
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
 
 ###############################################
 
 " Defining Variables "
 
-cdef double AU, PC, R, Year, t_max, dt_max
+cdef double AU, PC, R, Year, t_max, dt_max, e, n
 cdef int Ng, Dump, t
 
 " Size "
@@ -29,23 +35,25 @@ Dump = 50
 
 " Duration "
 Year = 365.26*(24*60*60)*(1.001)
-t_max = 1e5*Year; t = 0; dt_max = Year
+t_max = (1*10**5)*Year
+t = 0
+dt_max = Year
 
 " Initial Conditions "
 
 " Constants "
-e = 0.05*AU; n = 1e-2
+e = 0.05*AU
+n = 1*10**2
 
 ############################################
 
-def M(int N):
+def M(np.ndarray N):
 
     cdef int i, M0
-    cdef double Mass
+    cdef np.ndarray[double] Mass = np.zeros((N,), dtype=np.double)
 
     " Mass "
     M0 = 1.989e30
-    Mass = np.zeros(N)
     
     for i in range(N):
         M = M0    
@@ -56,11 +64,10 @@ def M(int N):
 def GroupP(int Ng):
 
     cdef int i, O, Ns
-    cdef double GrouPos, N, S, D, phi, X, Y, Z, C, A, R
+    cdef double S, D, phi, X, Y, Z, C, A, R
     
-    GroupPos = np.zeros((Ng,3))
-    
-    N = np.zeros(Ng)
+    cdef np.ndarray[double, ndim=2] GrouPos = np.zeros((Ng,3), dtype=np.double)   
+    cdef np.ndarray[double] N = np.zeros((Ng,), dtype=np.double)
     
     C = 20000*AU
     A = 1000*AU    
@@ -120,10 +127,10 @@ def GroupP(int Ng):
 def GroupV(int Ng):
 
     cdef int i, Vgroup
-    cdef double Vel, V, Vx, Vy, Vz, C
+    cdef double Vx, Vy, Vz, C
     
-    Vel = np.zeros((Ng,3))
-    V = np.zeros(Ng)
+    cdef np.ndarray[double, ndim=2] Vel = np.zeros((Ng,3), dtype=np.double) 
+    cdef np.ndarray[double] V = np.zeros((Ng,), dtype=np.double)
     
     for i in range(Ng):
         
@@ -139,10 +146,13 @@ def GroupV(int Ng):
         
     return Vel
     
-def PE(Pos, Mass, int e, int N):
+def PE(np.ndarray Pos, np.ndarray Mass, int e, int N):
+      
+    cdef int i, j    
+    cdef double m, r
     
-    Pe = np.zeros(N)
-    G = sc.gravitational_constant    
+    cdef np.ndarray[double] Pe = np.zeros((N,), dtype=np.double)
+    cdef double G = sc.gravitational_constant  
     
     for i in range(0,N-1):
         for j in range(i+1,N):     
@@ -155,17 +165,21 @@ def PE(Pos, Mass, int e, int N):
 
     return Pe
 
-def KE(Vel, Mass, N):
+def KE(np.ndarray Vel, np.ndarray Mass, int N):
     
-    Ke = np.zeros(N)
-    
+    cdef double vi
+    cdef int i
+    cdef np.ndarray[double] Ke = np.zeros((N,), dtype=np.double)
+
     for i in range(0,N):
         vi = LA.norm(Vel[i])        
         Ke[i] = .5*Mass[i]*vi**2
 
     return Ke
   
-def NormV(Vel, Pos, Mass, PE, N):
+def NormV(np.ndarray Vel, np.ndarray Pos, np.ndarray Mass, np.ndarray PE, int N):
+    
+    cdef double Ptot, Ktot, A, l, V
     
     Ptot = np.sum(-PE(Pos, Mass, e, N))        
     
@@ -181,13 +195,17 @@ def NormV(Vel, Pos, Mass, PE, N):
 
 ########################################################
 
-def IC(Ns, Ng, R):
-    
-    Pos = np.zeros((Ns,3))
+def IC(int Ns, int Ng, double R):
+
     V = []
     K = []
     P = []
-    Mass = np.zeros(Ns)
+    
+    cdef int i, j, a, O
+    cdef double mass, X, Y, Z, MOD, Vx, Vy, Vz, GroupVel, v
+    
+    cdef np.ndarray[double, ndim=2] Pos = np.zeros((Ns,3), dtype=np.double) 
+    cdef np.ndarray[double] Mass = np.zeros((Ns,), dtype=np.double)    
     
     O = -1
     
@@ -195,8 +213,9 @@ def IC(Ns, Ng, R):
         i = -1
         a = int(N[j])
         
-        pos = np.zeros((a,3))
-        vel = np.zeros((a,3))
+        cdef np.ndarray[double, ndim=2] pos = np.zeros((a,3), dtype=np.double) 
+        cdef np.ndarray[double, ndim=2] vel = np.zeros((a,3), dtype=np.double)
+    
         mass = M(a)
         
         while i < a:
@@ -207,11 +226,13 @@ def IC(Ns, Ng, R):
             Y = np.random.uniform(-R, R)
             Z = np.random.uniform(-R, R)
             
+            MOD = np.sqrt(X**2 + Y**2 + Z**2)
+            
             if i == (N[j]):
                 O = O - 1
                 break
                  
-            elif np.sqrt(X**2 + Y**2 + Z**2) <= R:
+            elif MOD <= R:
                 pos[i] = np.array([X,Y,Z])
                 Pos[O] = pos[i] + GroupPos[j]
                 
@@ -221,7 +242,7 @@ def IC(Ns, Ng, R):
                 
                 Mass[O] = mass[i]
                 
-            elif np.sqrt(X**2 + Y**2 + Z**2) > R:
+            elif MOD > R:
                i = i - 1
                O = O - 1
                
@@ -237,9 +258,10 @@ def IC(Ns, Ng, R):
     return Pos, V, Mass, K, P
         
 
-def IV(V, Ng, Ns):
+def IV(V, int Ng, int Ns):
     
-    Vel = np.zeros((Ns,3))
+    cdef int j, k, a, O
+    cdef np.ndarray[double, ndim=2] Vel = np.zeros((Ns,3), dtype=np.double) 
     
     O = -1
     
