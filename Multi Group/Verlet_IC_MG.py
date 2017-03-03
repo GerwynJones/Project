@@ -156,7 +156,7 @@ def KE(Vel, Mass, N):
 
     return Ke
   
-def NormV(Vel, Pos, Mass, PE, N):
+def NormV(Vel, Pos, Mass, N):
     
     Ptot = np.sum(-PE(Pos, Mass, e, N))        
     
@@ -218,7 +218,7 @@ def IC(Ns, Ng, R):
                
         GroupVel = GroupV(Ng)
     
-        v = NormV(vel, pos, mass, PE, a) + GroupVel[j]
+        v = NormV(vel, pos, mass, a) + GroupVel[j]
         
         K.append(np.sum(KE(v, mass, a)))
         P.append(np.sum(PE(pos, mass, e, a))) 

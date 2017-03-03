@@ -10,10 +10,8 @@ cimport numpy as np
 import scipy.constants as sc
 from numpy import linalg as LA
 
-
 @cython.boundscheck(False)
 @cython.wraparound(False)
-@cython.nonecheck(False)
 
 ###############################################
 
@@ -47,10 +45,10 @@ n = 1*10**2
 
 ############################################
 
-def M(np.ndarray N):
+def M(int N):
 
     cdef int i, M0
-    cdef np.ndarray[double] Mass = np.zeros((N,), dtype=np.double)
+    cdef np.ndarray[np.double_t] Mass = np.zeros((N,), dtype=np.double)
 
     " Mass "
     M0 = 1.989e30
@@ -66,8 +64,8 @@ def GroupP(int Ng):
     cdef int i, O, Ns
     cdef double S, D, phi, X, Y, Z, C, A, R
     
-    cdef np.ndarray[double, ndim=2] GrouPos = np.zeros((Ng,3), dtype=np.double)   
-    cdef np.ndarray[double] N = np.zeros((Ng,), dtype=np.double)
+    cdef np.ndarray[np.double_t, ndim=2] GrouPos = np.zeros((Ng,3), dtype=np.double)   
+    cdef np.ndarray[np.double_t] N = np.zeros((Ng,), dtype=np.double)
     
     C = 20000*AU
     A = 1000*AU    
@@ -129,8 +127,8 @@ def GroupV(int Ng):
     cdef int i, Vgroup
     cdef double Vx, Vy, Vz, C
     
-    cdef np.ndarray[double, ndim=2] Vel = np.zeros((Ng,3), dtype=np.double) 
-    cdef np.ndarray[double] V = np.zeros((Ng,), dtype=np.double)
+    cdef np.ndarray[np.double_t, ndim=2] Vel = np.zeros((Ng,3), dtype=np.double) 
+    cdef np.ndarray[np.double_t] V = np.zeros((Ng,), dtype=np.double)
     
     for i in range(Ng):
         
@@ -146,12 +144,12 @@ def GroupV(int Ng):
         
     return Vel
     
-def PE(np.ndarray Pos, np.ndarray Mass, int e, int N):
+def PE(np.ndarray[np.double_t, ndim=2] Pos, np.ndarray[np.double_t] Mass, int e, int N):
       
     cdef int i, j    
     cdef double m, r
     
-    cdef np.ndarray[double] Pe = np.zeros((N,), dtype=np.double)
+    cdef np.ndarray[np.double_t] Pe = np.zeros((N,), dtype=np.double)
     cdef double G = sc.gravitational_constant  
     
     for i in range(0,N-1):
@@ -165,11 +163,11 @@ def PE(np.ndarray Pos, np.ndarray Mass, int e, int N):
 
     return Pe
 
-def KE(np.ndarray Vel, np.ndarray Mass, int N):
+def KE(np.ndarray[np.double_t, ndim=2] Vel, np.ndarray[np.double_t] Mass, int N):
     
     cdef double vi
     cdef int i
-    cdef np.ndarray[double] Ke = np.zeros((N,), dtype=np.double)
+    cdef np.ndarray[np.double_t] Ke = np.zeros((N,), dtype=np.double)
 
     for i in range(0,N):
         vi = LA.norm(Vel[i])        
@@ -177,7 +175,7 @@ def KE(np.ndarray Vel, np.ndarray Mass, int N):
 
     return Ke
   
-def NormV(np.ndarray Vel, np.ndarray Pos, np.ndarray Mass, np.ndarray PE, int N):
+def NormV( np.ndarray[np.double_t, ndim=2] Vel, np.ndarray[np.double_t, ndim=2] Pos, np.ndarray[np.double_t] Mass, int N):
     
     cdef double Ptot, Ktot, A, l, V
     
@@ -204,8 +202,8 @@ def IC(int Ns, int Ng, double R):
     cdef int i, j, a, O
     cdef double mass, X, Y, Z, MOD, Vx, Vy, Vz, GroupVel, v
     
-    cdef np.ndarray[double, ndim=2] Pos = np.zeros((Ns,3), dtype=np.double) 
-    cdef np.ndarray[double] Mass = np.zeros((Ns,), dtype=np.double)    
+    cdef np.ndarray[np.double_t, ndim=2] Pos = np.zeros((Ns,3), dtype=np.double) 
+    cdef np.ndarray[np.double_t] Mass = np.zeros((Ns,), dtype=np.double)    
     
     O = -1
     
@@ -213,8 +211,8 @@ def IC(int Ns, int Ng, double R):
         i = -1
         a = int(N[j])
         
-        cdef np.ndarray[double, ndim=2] pos = np.zeros((a,3), dtype=np.double) 
-        cdef np.ndarray[double, ndim=2] vel = np.zeros((a,3), dtype=np.double)
+        cdef np.ndarray[np.double_t, ndim=2] pos = np.zeros((a,3), dtype=np.double) 
+        cdef np.ndarray[np.double_t, ndim=2] vel = np.zeros((a,3), dtype=np.double)
     
         mass = M(a)
         
@@ -248,7 +246,7 @@ def IC(int Ns, int Ng, double R):
                
         GroupVel = GroupV(Ng)
     
-        v = NormV(vel, pos, mass, PE, a) + GroupVel[j]
+        v = NormV(vel, pos, mass, a) + GroupVel[j]
         
         K.append(np.sum(KE(v, mass, a)))
         P.append(np.sum(PE(pos, mass, e, a))) 
@@ -261,7 +259,8 @@ def IC(int Ns, int Ng, double R):
 def IV(V, int Ng, int Ns):
     
     cdef int j, k, a, O
-    cdef np.ndarray[double, ndim=2] Vel = np.zeros((Ns,3), dtype=np.double) 
+    cdef double Vel
+    cdef np.ndarray[np.double_t, ndim=2] Vel = np.zeros((Ns,3), dtype=np.double) 
     
     O = -1
     

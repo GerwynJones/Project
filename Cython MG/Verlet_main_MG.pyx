@@ -16,6 +16,9 @@ pyximport.install()
 
 import Verlet_IC_MG
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+
 ##################################################
 
 def Verp(double oVel, double oPos, double dt, double acc):
