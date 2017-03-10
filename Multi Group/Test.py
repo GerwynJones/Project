@@ -50,26 +50,25 @@ def M(N):
         else:
             O = O - 1
 
-    return Mass
+    return Mass, C
 
 
 N = 100000
 
-Mass = M(N)
+Mass, C = M(N)
+
+x = np.linspace(1,100, N)
+y = IMF(2.3, C, x) + 1600
+
 
 plt.figure()
-plt.hist(Mass/(1.989e30), bins=np.logspace(0, 2, 100))
+plt.hist(Mass/(1.989e30)) # , bins=np.logspace(0, 2, 100))
+plt.plot(x, y)
 
-plt.xscale('log')
+#plt.xscale('log')
 plt.xlabel(r'$Log_{10} M$')
 plt.ylabel(r'N')
 plt.title("Histogram of mass of stars")
 
-plt.figure()
-plt.hist(np.log10(Mass/(1.989e30)), bins=100)
-
-plt.xlabel(r'$Log_{10} M$')
-plt.ylabel(r'N')
-plt.title("Histogram of mass of stars")
 
 plt.show()

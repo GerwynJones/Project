@@ -6,6 +6,7 @@ Created on Thu Nov 24 22:59:34 2016
 """
 from __future__ import division
 import numpy as np 
+import scipy.constants as sc
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import h5py
@@ -69,10 +70,10 @@ for k in range(Ng):
         
         j = i + 1
         
-        plt.plot(T, (Energy[i,:]), label = 'star %s' % j)
+        plt.plot(Time, E, label = 'star %s' % j)
         #  /Esum[k,:]
     plt.xlabel("Time (yrs)")     
-    plt.legend(loc = 'best')
+    #plt.legend(loc = 'best')
     
 plt.savefig('Graphs/Graph of Energy MG.png', bbox_inches='tight')
 
@@ -90,7 +91,7 @@ plt.show()
 
 # Dumping Data into Files
 
-#File No.
+# File No.
 Q = str(2)
 
 # Position
@@ -112,7 +113,8 @@ with h5py.File('Data_No'+Q+'/Time_No'+Q+'.h5', 'w') as hf:
 with h5py.File('Data_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
    hf.create_dataset("Mass_Data",  data=Mass)
 
-Year = (dt_max/10)
+
+Year = sc.Julian_year
 
 TR = np.array([(T_min/Year),(T_max/Year),T_Ratio])
 ST = np.array(['T Min','T Max','T Ratio'])

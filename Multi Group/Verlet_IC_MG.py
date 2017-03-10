@@ -8,7 +8,7 @@ from __future__ import division
 import numpy as np 
 import scipy.constants as sc
 from numpy import linalg as LA
-
+import h5py
 
 ###############################################
 
@@ -20,19 +20,19 @@ PC = 206265*AU
 R = 200*AU
 
 # No.Of.groups
-Ng = 10
+Ng = 1
 
 # Dumping Number
-Dump = 50
+Dump = 25
 
 # Duration
-Year = 365.26*(24*60*60)
-t_max = 1e6*Year; t = 0; dt_max = 5*Year
+Year = sc.Julian_year
+t_max = 1*Year; t = 0; dt_max = Year
 
 # Initial Conditions
 
 # Constants
-e = 0.1*AU; eta = 5
+e = 0.0001*AU; eta = 0.1
 
 ############################################
 
@@ -196,7 +196,7 @@ def NormV(Vel, Pos, Mass, N):
     
     l = np.random.uniform(0.95, 1)
     
-    V = l*Vel/np.sqrt(Tot)
+    V = Vel/np.sqrt(Tot)
     
     return V
 
@@ -275,11 +275,12 @@ def IV(V, Ng, Ns):
 
 #############################################
  
-GroupPos, Ns, N = GroupP(Ng)           
+#GroupPos, Ns, N = GroupP(Ng)           
+#
+#Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R)
+#
+#Vel = IV(V, Ng, Ns)
 
-Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R)
-
-Vel = IV(V, Ng, Ns)
 
 # Dumping Data into Files
 
@@ -287,4 +288,83 @@ Vel = IV(V, Ng, Ns)
 
 Q = str( 1 )
 
-np.savez('IC/IC_No'+Q+'', Pos, Vel, Mass, Ns, Ng, N, e, eta, PC, R, t_max, dt_max, t, Dump)
+Ns = 2; N = np.array([2])
+
+Mass = np.array([1.989e30, 5.972e24])
+
+Pos=np.zeros((Ns,3))
+
+Pos[1] = np.array([0,AU,0])
+
+Vel=np.zeros((Ns,3)) 
+
+V = 29754.7
+
+Vel[1] = np.array([V,0,0])
+
+
+
+# Position
+with h5py.File('IC_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
+    hf.create_dataset("Position_Data",  data=Pos)
+
+# Velocity
+with h5py.File('IC_No'+Q+'/Velocity_No'+Q+'.h5', 'w') as hf:
+    hf.create_dataset("Velocity_Data",  data=Vel)
+    
+# Mass
+with h5py.File('IC_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Mass_Data",  data=Mass)
+
+# NGroup
+with h5py.File('IC_No'+Q+'/Ng_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Ng_Data",  data=Ng)
+
+# Ns
+with h5py.File('IC_No'+Q+'/Ns_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Ns_Data",  data=Ns)
+
+# N
+with h5py.File('IC_No'+Q+'/N_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("N_Data",  data=N)
+
+# Dump
+with h5py.File('IC_No'+Q+'/Dump_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Dump_Data",  data=Dump)
+
+# T_max
+with h5py.File('IC_No'+Q+'/Tmax_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Tmax_Data",  data=t_max)
+
+# T
+with h5py.File('IC_No'+Q+'/t_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("t_Data",  data=t)
+
+# dT
+with h5py.File('IC_No'+Q+'/dt_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("dt_Data",  data=dt_max)
+
+# eta
+with h5py.File('IC_No'+Q+'/eta_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("eta_Data",  data=eta)
+   
+# e
+with h5py.File('IC_No'+Q+'/e_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("e_Data",  data=e)
+
+
+# Earth - Sun IC
+
+#Ns = 2; N = np.array([2])
+#
+#Mass = np.array([1.989e30, 5.972e24])
+#
+#Pos=np.zeros((Ns,3))
+#
+#Pos[1] = np.array([0,AU,0])
+#
+#Vel=np.zeros((Ns,3)) 
+#
+#V = 29754.7
+#
+#Vel[1] = np.array([V,0,0])

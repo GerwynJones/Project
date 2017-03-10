@@ -9,18 +9,61 @@ from __future__ import division
 import numpy as np
 import scipy.constants as sc
 from numpy import linalg as LA
+import h5py
 
-#  File no.
+#from Verlet_IC_MG import *
+
+##  File no.
 Q = str( 1 )
 
-npzfile = np.load('IC/IC_No'+Q+'.npz')
+# Position
+with h5py.File('IC_No'+Q+'/Position_No'+Q+'.h5', 'r') as hf:
+    Pos = hf['Position_Data'][:]
 
-Pos = npzfile['arr_0']; Vel = npzfile['arr_1']; Mass = npzfile['arr_2']
-Ns = npzfile['arr_3']; Ng = npzfile['arr_4']; N = npzfile['arr_5']
-e = npzfile['arr_6']; eta = npzfile['arr_7']
-PC = npzfile['arr_8']; R = npzfile['arr_9']
-t_max = npzfile['arr_10']; dt_max = npzfile['arr_11']; t = npzfile['arr_12']
-Dump = npzfile['arr_13']
+# Velocity
+with h5py.File('IC_No'+Q+'/Velocity_No'+Q+'.h5', 'r') as hf:
+    Vel = hf['Velocity_Data'][:]
+    
+# Mass
+with h5py.File('IC_No'+Q+'/Mass_No'+Q+'.h5', 'r') as hf:
+    Mass = hf['Mass_Data'][:]
+
+# NGroup
+with h5py.File('IC_No'+Q+'/Ng_No'+Q+'.h5', 'r') as hf:
+    Ng = hf['Ng_Data'][:]
+
+# Ns
+with h5py.File('IC_No'+Q+'/Ns_No'+Q+'.h5', 'r') as hf:
+    Ns = hf['Ns_Data'][:]
+    
+# N
+with h5py.File('IC_No'+Q+'/N_No'+Q+'.h5', 'r') as hf:
+    N = hf['N_Data'][:]
+    
+# Dump
+with h5py.File('IC_No'+Q+'/Dump_No'+Q+'.h5', 'r') as hf:
+    Dump = hf['Dump_Data'][:]
+    
+# T_max
+with h5py.File('IC_No'+Q+'/Tmax_No'+Q+'.h5', 'r') as hf:
+    t_max = hf['Tmax_Data'][:]
+    
+# T
+with h5py.File('IC_No'+Q+'/t_No'+Q+'.h5', 'r') as hf:
+    t = hf['t_Data'][:]
+    
+# dT
+with h5py.File('IC_No'+Q+'/dt_No'+Q+'.h5', 'r') as hf:
+    dt_max = hf['dt_Data'][:]
+    
+# eta
+with h5py.File('IC_No'+Q+'/eta_No'+Q+'.h5', 'r') as hf:
+    eta = hf['eta_Data'][:]
+    
+# e
+with h5py.File('IC_No'+Q+'/e_No'+Q+'.h5', 'r') as hf:
+    e = hf['e_Data'][:]
+    
 
 ##################################################
 

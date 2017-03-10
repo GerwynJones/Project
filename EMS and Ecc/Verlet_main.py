@@ -9,7 +9,7 @@ import numpy as np
 import scipy.constants as sc
 from numpy import linalg as LA
 
-from Verlet_IC_Ecc import *
+from Verlet_IC_EMS import *
 
 #####################
 
@@ -84,16 +84,20 @@ while t < t_max:
     A = np.asarray(a)
     b.append(pos[1]/AU)
     B = np.asarray(b)
-#    c.append(pos[2]/AU)
-#    C = np.asarray(c)
+
     """Dump energies into file"""
-    Ta.append(pe[0] + ke[0])
-    Ea = np.asarray(Ta)
-    Tb.append(pe[1] + ke[1])
-    Eb = np.asarray(Tb)
-#    Tc.append(pe[2] + ke[2])
-#    Ec =  np.asarray(Tc)
-    Tsum.append(pe[0] + ke[0] + pe[1] + ke[1]) # + pe[2] + ke[2])
+    Ka.append(ke[0])
+    EKa = np.asarray(Ka)
+    Pa.append(pe[0])
+    EPa = np.asarray(Pa)    
+    
+    Kb.append(ke[1])
+    EKb = np.asarray(Kb)
+    Pb.append(pe[1])
+    EPb = np.asarray(Pb)    
+
+
+    Tsum.append(pe[0] + ke[0] + pe[1] + ke[1]) 
     Esum =  np.asarray(Tsum)
     
     if t == t_max:
