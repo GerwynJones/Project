@@ -9,43 +9,73 @@ import numpy as np
 import scipy.constants as sc
 from numpy import linalg as LA
 
+
 ###############################################
 
-" Defining Variables "
+# Defining Variables
 
-" Size "
+# Size
 AU = sc.astronomical_unit
 PC = 206265*AU
 R = 200*AU
 
-" No.Of.groups "
-Ng = 1
+# No.Of.groups
+Ng = 10
 
-" Dumping Number"
+# Dumping Number
 Dump = 50
 
-" Duration "
-Year = 365.26*(24*60*60)*(1.001)
-t_max = 1e5*Year; t = 0; dt_max = Year
+# Duration
+Year = 365.26*(24*60*60)
+t_max = 1e6*Year; t = 0; dt_max = 5*Year
 
-" Initial Conditions "
+# Initial Conditions
 
-" Constants "
-e = 0.05*AU; n = 1e-2
+# Constants
+e = 0.1*AU; eta = 5
 
 ############################################
 
+def IMF(alpha, C, M):
+    B = (C/(-alpha + 1))*(M**(-alpha + 1))
+    return B
+
 def M(N):
-    
-    Mass = np.zeros(N)
-    " Mass "
+
+    """ Mass """
     M0 = 1.989e30
     Mass = np.zeros(N)
-    
-    for i in range(N):
-        M = M0    
-        Mass[i] = np.array([M])
-        
+
+    alpha = 2.3
+
+    M_Min = 1
+    M_Max = 100
+
+    N_Min = 1
+
+    C = (N_Min*(-alpha + 1))/(M_Max**(-alpha + 1))
+
+    N_Max = IMF(alpha, C, M_Min)
+
+    O = -1
+
+    while True:
+        O = O + 1
+
+        dN = np.random.uniform(0,N_Max)
+        M = np.random.uniform(M_Min,M_Max)
+
+        B = IMF(alpha, C, M)
+
+        if O == N:
+            break
+
+        elif dN <= B:
+            Mass[O]= np.array([M*M0])
+
+        else:
+            O = O - 1
+
     return Mass
 
 def GroupP(Ng):
@@ -68,10 +98,10 @@ def GroupP(Ng):
         
         i = i + 1
         
-        if i == (Ng):
+        if i == Ng:
             break
         
-        elif O <= (PC-C)/C:
+        elif O <= (PC-2*C)/C:
             
             S = np.random.randint(3, 6)
             
@@ -90,7 +120,7 @@ def GroupP(Ng):
             
             GroupPos[i] = np.array([X,Y,Z])
 
-        elif O > (PC-C)/C:
+        elif O > (PC-2*C)/C:
             
             S = np.random.randint(3, 6)
             
@@ -151,8 +181,8 @@ def KE(Vel, Mass, N):
     Ke = np.zeros(N)
     
     for i in range(0,N):
-        vi = LA.norm(Vel[i])        
-        Ke[i] = .5*Mass[i]*vi**2
+        modv = LA.norm(Vel[i])
+        Ke[i] = .5*Mass[i]*modv**2
 
     return Ke
   
@@ -162,11 +192,11 @@ def NormV(Vel, Pos, Mass, N):
     
     Ktot = np.sum(KE(Vel, Mass, N))    
     
-    A = (2*Ktot)/Ptot
+    Tot = (2*Ktot)/Ptot
     
-    l = np.random.uniform(0.9, 1)
+    l = np.random.uniform(0.95, 1)
     
-    V = l*Vel/np.sqrt(A)    
+    V = l*Vel/np.sqrt(Tot)
     
     return V
 
@@ -186,9 +216,9 @@ def IC(Ns, Ng, R):
         i = -1
         a = int(N[j])
         
-        pos = np.zeros((a,3))
-        vel = np.zeros((a,3))
-        mass = M(a)
+        apos = np.zeros((a,3))
+        avel = np.zeros((a,3))
+        amass = M(a)
         
         while i < a:
             i = i + 1
@@ -203,14 +233,14 @@ def IC(Ns, Ng, R):
                 break
                  
             elif np.sqrt(X**2 + Y**2 + Z**2) <= R:
-                pos[i] = np.array([X,Y,Z])
-                Pos[O] = pos[i] + GroupPos[j]
+                apos[i] = np.array([X,Y,Z])
+                Pos[O] = apos[i] + GroupPos[j]
                 
                 Vx, Vy, Vz = np.random.uniform(-1,1,3)
         
-                vel[i] = np.array([Vx, Vy, Vz])
+                avel[i] = np.array([Vx, Vy, Vz])
                 
-                Mass[O] = mass[i]
+                Mass[O] = amass[i]
                 
             elif np.sqrt(X**2 + Y**2 + Z**2) > R:
                i = i - 1
@@ -218,12 +248,12 @@ def IC(Ns, Ng, R):
                
         GroupVel = GroupV(Ng)
     
-        v = NormV(vel, pos, mass, a) + GroupVel[j]
+        GV = NormV(avel, apos, amass, a) + GroupVel[j]
         
-        K.append(np.sum(KE(v, mass, a)))
-        P.append(np.sum(PE(pos, mass, e, a))) 
+        K.append(np.sum(KE(GV, amass, a)))
+        P.append(np.sum(PE(apos, amass, e, a)))
         
-        V.append(v)
+        V.append(GV)
     
     return Pos, V, Mass, K, P
         
@@ -250,5 +280,11 @@ GroupPos, Ns, N = GroupP(Ng)
 Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R)
 
 Vel = IV(V, Ng, Ns)
- 
- 
+
+# Dumping Data into Files
+
+# File No.
+
+Q = str( 1 )
+
+np.savez('IC/IC_No'+Q+'', Pos, Vel, Mass, Ns, Ng, N, e, eta, PC, R, t_max, dt_max, t, Dump)

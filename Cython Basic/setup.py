@@ -9,5 +9,5 @@ from distutils.core import setup
 from Cython.Build import cythonize
 
 setup(
-  ext_modules = cythonize(["Verlet_main_MG.pyx"]),
+  ext_modules = cythonize(["Verlet_IC_MG.pyx"]),
 )

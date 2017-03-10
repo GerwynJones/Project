@@ -8,11 +8,13 @@ from __future__ import division
 import numpy as np 
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-#from  import h5py
+import h5py
 
 from Verlet_main_MG import *
 
 plt.close('all')
+
+print("Starting Plot File")
 
 Position = np.zeros((Ns,len(P),3))
 Acceleration = np.zeros((Ns,len(P)))
@@ -23,7 +25,6 @@ Time = np.zeros(len(P))
 T_max = np.max(dT) 
 T_min = np.min(dT)
 T_Ratio = T_max/T_min
-
 
 for j in range(len(P)):
     O = np.zeros(Ng+1)
@@ -54,11 +55,11 @@ for i in range(Ns):
     
 plt.ylabel(r'Distance $(AU)$')
 plt.xlabel(r'Distance $(AU)$')
-plt.savefig('Graph of 2D MG.png', bbox_inches='tight') 
+plt.savefig('Graphs/Graph of 2D MG.png', bbox_inches='tight')
 plt.legend(loc = 'best')
 
 
-O = np.zeros(Ng+1)
+O = np.zeros(Ng + 1)
 
 for k in range(Ng):
     plt.figure()
@@ -68,15 +69,15 @@ for k in range(Ng):
         
         j = i + 1
         
-        plt.plot(T, (Energy[i,:]/Esum[k,:]), label = 'star %s' % j)
+        plt.plot(T, (Energy[i,:]), label = 'star %s' % j)
+        #  /Esum[k,:]
     plt.xlabel("Time (yrs)")     
     plt.legend(loc = 'best')
     
-plt.savefig('Graph of Energy MG.png', bbox_inches='tight')
+plt.savefig('Graphs/Graph of Energy MG.png', bbox_inches='tight')
 
 
 plt.figure()
-
 
 for i in range(Ns):  
     j = i + 1    
@@ -87,21 +88,36 @@ plt.legend(loc = 'best')
 
 plt.show()
 
-#""" Dumping Data into Files """
-#
-#""" Position """
-#with h5py.File('Position_No1.h5', 'w') as hf:
-#    hf.create_dataset("Position_Data",  data=Position)
-#
-#
-#""" Energies """
-#with h5py.File('Energies_No1.h5', 'w') as hf:
-#    hf.create_dataset("Energy_Data",  data=Energy)
-#    
-#with h5py.File('Energy_Sum_No1.h5', 'w') as hf:
-#    hf.create_dataset("Esum_Data",  data=Esum)
-#    
-#""" Time """
-#with h5py.File('Time_No1.h5', 'w') as hf:
-#    hf.create_dataset("Time_Data",  data=Time)
-#    
+# Dumping Data into Files
+
+#File No.
+Q = str(2)
+
+# Position
+with h5py.File('Data_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
+    hf.create_dataset("Position_Data",  data=Position)
+
+# Energies
+with h5py.File('Data_No'+Q+'/Energies_No'+Q+'.h5', 'w') as hf:
+    hf.create_dataset("Energy_Data",  data=Energy)
+
+with h5py.File('Data_No'+Q+'/Energy_Sum_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Esum_Data",  data=Esum)
+
+# Time
+with h5py.File('Data_No'+Q+'/Time_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Time_Data",  data=Time)
+
+# Mass
+with h5py.File('Data_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
+   hf.create_dataset("Mass_Data",  data=Mass)
+
+Year = (dt_max/10)
+
+TR = np.array([(T_min/Year),(T_max/Year),T_Ratio])
+ST = np.array(['T Min','T Max','T Ratio'])
+
+LoadTime = np.column_stack((ST, TR))
+
+np.savetxt('Time_Results/Time.txt', LoadTime, delimiter=" ", fmt="%s")
+

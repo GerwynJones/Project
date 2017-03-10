@@ -8,7 +8,7 @@ import h5py
 """ Reading Data from Files """
 
 #File No.
-Q = str(1)
+Q = str(2)
 
 """ Position """
 with h5py.File('Position_No'+Q+'.h5', 'r') as hf:
@@ -25,4 +25,9 @@ with h5py.File('Energy_Sum_No'+Q+'.h5', 'r') as hf:
 with h5py.File('Time_No'+Q+'.h5', 'r') as hf:
     Time = hf['Time_Data'][:]
 
+""" Mass """
+with h5py.File('Mass_No'+Q+'.h5', 'r') as hf:
+    Mass = hf['Mass_Data'][:]
 
+
+print Mass

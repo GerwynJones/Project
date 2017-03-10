@@ -21,27 +21,27 @@ import Verlet_IC_MG
 
 ##################################################
 
-def Verp(double oVel, double oPos, double dt, double acc):
+def Verp(np.ndarray[np.double_t, ndim=2] oVel, np.ndarray[np.double_t, ndim=2] oPos, double dt, np.ndarray[np.double_t, ndim=2] acc):
     cdef double Pos
     "Position:"
     Pos = oPos + oVel*dt + .5*acc*dt**2
     return Pos
     
     
-def Verv(double Pos, double Mass, double oVel, double dt, double acc, int e, int Ns):
+def Verv(np.ndarray[np.double_t, ndim=2] Pos, np.ndarray[np.double_t] Mass, np.ndarray[np.double_t, ndim=2] oVel, double dt, np.ndarray[np.double_t, ndim=2] acc, int e, int Ns):
     cdef double anew, pe, Vel
     "Velocities:"
-    anew, pe = Acc(double Pos, double Mass, double oVel, int e, int Ns)
+    anew, pe = Acc(Pos, Mass, oVel, e, Ns)
     Vel = oVel + .5*(acc + anew)*dt
     return Vel
 
 
-def Acc(double Pos, double Mass, double Vel, int e, int Ns):
+def Acc(np.ndarray[np.double_t, ndim=2] Pos, np.ndarray[np.double_t] Mass, np.ndarray[np.double_t, ndim=2] Vel, int e, int Ns):
     
     cdef int i, j
     cdef double G, r, m, F
-    cdef np.ndarray[np.double_t, ndim=2] acc = np.zeros((Ns,3) dtype=np.double)
-    cdef np.ndarray[np.double_t] Pe = np.zeros((Ns,) dtype=np.double)
+    cdef np.ndarray[np.double_t, ndim=2] acc = np.zeros((Ns,3))
+    cdef np.ndarray[np.double_t] Pe = np.zeros((Ns,))
 
     "Acceleration:"
     G = sc.gravitational_constant
@@ -61,10 +61,10 @@ def Acc(double Pos, double Mass, double Vel, int e, int Ns):
     return acc, Pe
 
 
-def KE(double Vel, double Mass, int Ns):
+def KE(np.ndarray[np.double_t, ndim=2] Vel, np.ndarray[np.double_t] Mass, int Ns):
     
     cdef double vi
-    cdef np.ndarray[np.double_t] Ke = np.zeros((Ns,), dtype=np.double)
+    cdef np.ndarray[np.double_t] Ke = np.zeros((Ns,))
     
     for i in range(0,Ns):
         vi = LA.norm(Vel[i])        
@@ -77,8 +77,7 @@ def KE(double Vel, double Mass, int Ns):
 P = []; A = []; E = []
 T = []; dT = []    
 
-cdef int O = 0
-cdef double a, dt_grav, oPos, oVel, TE, acc, Pe, Ke 
+O = 0
 
 while t < t_max:    
     O = O + 1
@@ -86,8 +85,6 @@ while t < t_max:
     acc, Pe = Acc(Pos, Mass, Vel, e, Ns)
     
     Ke = KE(Vel, Mass, Ns)
-    
-    cdef double a, dt_grav, oPos, oVel, TE
     
     a = (LA.norm(acc, axis = 1))
     
