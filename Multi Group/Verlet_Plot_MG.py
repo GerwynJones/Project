@@ -18,7 +18,6 @@ plt.close('all')
 print("Starting Plot File")
 
 Position = np.zeros((Ns,len(P),3))
-Acceleration = np.zeros((Ns,len(P)))
 Energy = np.zeros((Ns,len(P)))
 Esum = np.zeros((Ng,len(P)))
 Time = np.zeros(len(P))
@@ -32,8 +31,7 @@ for j in range(len(P)):
     for k in range(Ng): 
         for i in range(Ns):
             O[k] = O[k-1] + N[k]
-            Position[i][j,:] = P[j][i,:] 
-            Acceleration[i,j] = A[j][i]
+            Position[i][j,:] = P[j][i,:]
             Energy[i,j] = E[j][i]
             Esum[k,j] = np.sum(E[j][O[k-1]:O[k]])
             Time[j] = T[j]
@@ -56,7 +54,7 @@ for i in range(Ns):
     
 plt.ylabel(r'Distance $(AU)$')
 plt.xlabel(r'Distance $(AU)$')
-plt.savefig('Graphs/Graph of 2D MG.png', bbox_inches='tight')
+#plt.savefig('Graphs/Graph of 2D MG.png', bbox_inches='tight')
 plt.legend(loc = 'best')
 
 
@@ -70,23 +68,18 @@ for k in range(Ng):
         
         j = i + 1
         
-        plt.plot(Time, E, label = 'star %s' % j)
+        plt.plot(Time, Energy[i,:]/Esum[k,:], label = 'star %s' % j)
         #  /Esum[k,:]
-    plt.xlabel("Time (yrs)")     
-    #plt.legend(loc = 'best')
+    plt.xlabel("Time (yrs)")
+    plt.legend(loc = 'best')
     
-plt.savefig('Graphs/Graph of Energy MG.png', bbox_inches='tight')
+#plt.savefig('Graphs/Graph of Energy MG.png', bbox_inches='tight')
 
 
-plt.figure()
-
-for i in range(Ns):  
-    j = i + 1    
-    
-    plt.plot(T, Acceleration[i,:])
-
-plt.legend(loc = 'best')
-
+plt.plot(Time, E)
+plt.xlabel("Time (yrs)")
+plt.ylabel("Energy (J)")
+plt.title("Graph of Total energy of system")
 plt.show()
 
 # Dumping Data into Files
@@ -121,5 +114,5 @@ ST = np.array(['T Min','T Max','T Ratio'])
 
 LoadTime = np.column_stack((ST, TR))
 
-np.savetxt('Time_Results/Time.txt', LoadTime, delimiter=" ", fmt="%s")
+np.savetxt('Data_No'+Q+'/Time.txt', LoadTime, delimiter=" ", fmt="%s")
 
