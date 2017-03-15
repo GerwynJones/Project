@@ -18,7 +18,7 @@ AU = sc.astronomical_unit
 R = 200*AU
 
 " No.Of.Stars "
-N = 10
+N = 2
 
 " Mass "
 M0 = 1.989e30

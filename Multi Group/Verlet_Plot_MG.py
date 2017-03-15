@@ -9,7 +9,7 @@ import numpy as np
 import scipy.constants as sc
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-import h5py
+#import h5py
 
 from Verlet_main_MG import *
 
@@ -69,50 +69,59 @@ for k in range(Ng):
         j = i + 1
         
         plt.plot(Time, Energy[i,:]/Esum[k,:], label = 'star %s' % j)
-        #  /Esum[k,:]
+        
     plt.xlabel("Time (yrs)")
     plt.legend(loc = 'best')
     
 #plt.savefig('Graphs/Graph of Energy MG.png', bbox_inches='tight')
 
-
-plt.plot(Time, E)
+plt.figure()
+plt.plot(Time, Esum[0,:])
 plt.xlabel("Time (yrs)")
 plt.ylabel("Energy (J)")
 plt.title("Graph of Total energy of system")
 plt.show()
 
+plt.figure()
+plt.plot(Time, N1); plt.plot(Time, N2)
+plt.xlabel("Time (yrs)")
+plt.ylabel("Energy (J)")
+plt.title("Graph of Energy of system")
+plt.show()
+
+
+
 # Dumping Data into Files
 
 # File No.
-Q = str(2)
+#Q = str(2)
 
-# Position
-with h5py.File('Data_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
-    hf.create_dataset("Position_Data",  data=Position)
+## Position
+#with h5py.File('Data_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
+#    hf.create_dataset("Position_Data",  data=Position)
+#
+## Energies
+#with h5py.File('Data_No'+Q+'/Energies_No'+Q+'.h5', 'w') as hf:
+#    hf.create_dataset("Energy_Data",  data=Energy)
+#
+#with h5py.File('Data_No'+Q+'/Energy_Sum_No'+Q+'.h5', 'w') as hf:
+#   hf.create_dataset("Esum_Data",  data=Esum)
+#
+## Time
+#with h5py.File('Data_No'+Q+'/Time_No'+Q+'.h5', 'w') as hf:
+#   hf.create_dataset("Time_Data",  data=Time)
+#
+## Mass
+#with h5py.File('Data_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
+#   hf.create_dataset("Mass_Data",  data=Mass)
 
-# Energies
-with h5py.File('Data_No'+Q+'/Energies_No'+Q+'.h5', 'w') as hf:
-    hf.create_dataset("Energy_Data",  data=Energy)
 
-with h5py.File('Data_No'+Q+'/Energy_Sum_No'+Q+'.h5', 'w') as hf:
-   hf.create_dataset("Esum_Data",  data=Esum)
-
-# Time
-with h5py.File('Data_No'+Q+'/Time_No'+Q+'.h5', 'w') as hf:
-   hf.create_dataset("Time_Data",  data=Time)
-
-# Mass
-with h5py.File('Data_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
-   hf.create_dataset("Mass_Data",  data=Mass)
-
-
-Year = sc.Julian_year
-
-TR = np.array([(T_min/Year),(T_max/Year),T_Ratio])
-ST = np.array(['T Min','T Max','T Ratio'])
-
-LoadTime = np.column_stack((ST, TR))
-
-np.savetxt('Data_No'+Q+'/Time.txt', LoadTime, delimiter=" ", fmt="%s")
+#Year = sc.Julian_year
+#
+#TR = np.array([(T_min/Year),(T_max/Year),T_Ratio])
+#ST = np.array(['T Min','T Max','T Ratio'])
+#
+#LoadTime = np.column_stack((ST, TR))
+#
+#np.savetxt('Data_No'+Q+'/Time.txt', LoadTime, delimiter=" ", fmt="%s")
 

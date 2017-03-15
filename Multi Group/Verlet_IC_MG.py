@@ -8,7 +8,7 @@ from __future__ import division
 import numpy as np 
 import scipy.constants as sc
 from numpy import linalg as LA
-import h5py
+#import h5py
 
 ###############################################
 
@@ -20,61 +20,35 @@ PC = 206265*AU
 R = 200*AU
 
 # No.Of.groups
-Ng = 10
+Ng = 1
 
 # Dumping Number
-Dump = 40
+Dump = 10
 
 # Duration
 Year = sc.Julian_year
-t_max = 1e6*Year; t = 0; dt_max = Year
+t_max = 1e5*Year; t = 0; dt_max = Year/5
 
 # Initial Conditions
 
 # Constants
-e = 0.5*AU; eta = 1
+e = 0.005*AU; eta = 0.1
 
 ############################################
 
-def IMF(alpha, C, M):
-    B = (C/(-alpha + 1))*(M**(-alpha + 1))
-    return B
-
-def M(N):
+def M(N, mean = np.log10(0.08), sigma = 0.69):
 
     """ Mass """
     M0 = 1.989e30
     Mass = np.zeros(N)
 
-    alpha = 2.3
-
-    M_Min = 1
-    M_Max = 100
-
-    N_Min = 1
-
-    C = (N_Min*(-alpha + 1))/(M_Max**(-alpha + 1))
-
-    N_Max = IMF(alpha, C, M_Min)
-
-    O = -1
-
-    while True:
-        O = O + 1
-
-        dN = np.random.uniform(0,N_Max)
-        M = np.random.uniform(M_Min,M_Max)
-
-        B = IMF(alpha, C, M)
-
-        if O == N:
-            break
-
-        elif dN <= B:
-            Mass[O]= np.array([M*M0])
-
-        else:
-            O = O - 1
+    C = np.log(10)/(0.158*np.sqrt(2*np.pi)*sigma)
+    
+    for i in xrange(N):
+        
+        M = 1 #np.log10(np.random.lognormal(mean, sigma)*C)
+    
+        Mass[i] = np.array([M*M0])
 
     return Mass
 
@@ -103,7 +77,7 @@ def GroupP(Ng):
         
         elif O <= (PC-2*C)/C:
             
-            S = np.random.randint(3, 6)
+            S = 2 #np.random.randint(3, 6)
             
             N[i] = S
             
@@ -146,7 +120,7 @@ def GroupV(Ng):
     Vel = np.zeros((Ng,3))
     V = np.zeros(Ng)
     
-    for i in range(Ng):
+    for i in xrange(Ng):
         
         Vgroup = 0.2e3
         
@@ -165,8 +139,8 @@ def PE(Pos, Mass, e, N):
     Pe = np.zeros(N)
     G = sc.gravitational_constant    
     
-    for i in range(0,N-1):
-        for j in range(i+1,N):     
+    for i in xrange(0, N - 1):
+        for j in xrange(i + 1, N):     
             
             r = Pos[i]-Pos[j]
             m = LA.norm(r)
@@ -180,7 +154,7 @@ def KE(Vel, Mass, N):
     
     Ke = np.zeros(N)
     
-    for i in range(0,N):
+    for i in xrange(0,N):
         modv = LA.norm(Vel[i])
         Ke[i] = .5*Mass[i]*modv**2
 
@@ -190,19 +164,22 @@ def NormV(Vel, Pos, Mass, N):
     
     Ptot = np.sum(-PE(Pos, Mass, e, N))        
     
-    Ktot = np.sum(KE(Vel, Mass, N))    
+    " This is not Virial as it doesnt take into account the applied group velocity "
+    
+    Ktot = np.sum(KE(Vel, Mass, N))
     
     Tot = (2*Ktot)/Ptot
     
-    l = np.random.uniform(0.95, 1)
+    l = np.random.uniform(0.9, 1)
     
-    V = Vel/np.sqrt(Tot)
+    V = l*Vel/np.sqrt(Tot)
     
     return V
 
 ########################################################
 
-def IC(Ns, Ng, R, GroupPos):
+def IC(Ns, Ng, R, GroupPos, N):
+    """ Creating the initial conditions with random points within a cylinder """    
     
     Pos = np.zeros((Ns,3))
     V = []
@@ -212,7 +189,7 @@ def IC(Ns, Ng, R, GroupPos):
     
     O = -1
     
-    for j in range(Ng):
+    for j in xrange(Ng):
         i = -1
         a = int(N[j])
         
@@ -258,15 +235,16 @@ def IC(Ns, Ng, R, GroupPos):
     return Pos, V, Mass, K, P
         
 
-def IV(V, Ng, Ns):
+def IV(V, Ng, Ns, N):
+    """ Converting the Velocity array into something the loop can use """
     
     Vel = np.zeros((Ns,3))
     
     O = -1
     
-    for j in range(Ng):
+    for j in xrange(Ng):
         a = int(N[j])
-        for k in range(a):
+        for k in xrange(a):
             O = O + 1
             
             Vel[O] = V[j][k,:]
@@ -277,64 +255,64 @@ def IV(V, Ng, Ns):
  
 GroupPos, Ns, N = GroupP(Ng)
 
-Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R, GroupPos)
+Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R, GroupPos, N)
 
-Vel = IV(V, Ng, Ns)
+Vel = IV(V, Ng, Ns, N)
 
 
 # Dumping Data into Files
 
 # File No.
 
-Q = str( 1 )
-
-# Position
-with h5py.File('IC_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
-    hf.create_dataset("Position_Data",  data=Pos)
-
-# Velocity
-with h5py.File('IC_No'+Q+'/Velocity_No'+Q+'.h5', 'w') as hf:
-    hf.create_dataset("Velocity_Data",  data=Vel)
-    
-# Mass
-with h5py.File('IC_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
-   hf.create_dataset("Mass_Data",  data=Mass)
-
-# N
-with h5py.File('IC_No'+Q+'/N_No'+Q+'.h5', 'w') as hf:
-   hf.create_dataset("N_Data",  data=N)
-
-# NGroup
-with open('IC_No'+Q+'/Ng_No'+Q+'.txt', 'w') as f:
-  f.write('%d' % Ng)
-
-# Ns
-with open('IC_No'+Q+'/Ns_No'+Q+'.txt', 'w') as f:
-  f.write('%d' % Ns)
-
-# Dump
-with open('IC_No'+Q+'/Dump_No'+Q+'.txt', 'w') as f:
-  f.write('%d' % Dump)
-
-# T_max
-with open('IC_No'+Q+'/Tmax_No'+Q+'.txt', 'w') as f:
-  f.write('%d' % t_max)
-
-# T
-with open('IC_No'+Q+'/t_No'+Q+'.txt', 'w') as f:
-  f.write('%d' % t)
-
-# dT
-with open('IC_No'+Q+'/dT_No'+Q+'.txt', 'w') as f:
-  f.write('%d' % dt_max)
-
-# eta
-with open('IC_No'+Q+'/eta_No'+Q+'.txt', 'w') as f:
-  f.write('%f' % eta)
-
-# e
-with open('IC_No'+Q+'/e_No'+Q+'.txt', 'w') as f:
-  f.write('%d' % e)
+#Q = str( 1 )
+#
+## Position
+#with h5py.File('IC_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
+#    hf.create_dataset("Position_Data",  data=Pos)
+#
+## Velocity
+#with h5py.File('IC_No'+Q+'/Velocity_No'+Q+'.h5', 'w') as hf:
+#    hf.create_dataset("Velocity_Data",  data=Vel)
+#    
+## Mass
+#with h5py.File('IC_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
+#   hf.create_dataset("Mass_Data",  data=Mass)
+#
+## N
+#with h5py.File('IC_No'+Q+'/N_No'+Q+'.h5', 'w') as hf:
+#   hf.create_dataset("N_Data",  data=N)
+#
+## NGroup
+#with open('IC_No'+Q+'/Ng_No'+Q+'.txt', 'w') as f:
+#  f.write('%d' % Ng)
+#
+## Ns
+#with open('IC_No'+Q+'/Ns_No'+Q+'.txt', 'w') as f:
+#  f.write('%d' % Ns)
+#
+## Dump
+#with open('IC_No'+Q+'/Dump_No'+Q+'.txt', 'w') as f:
+#  f.write('%d' % Dump)
+#
+## T_max
+#with open('IC_No'+Q+'/Tmax_No'+Q+'.txt', 'w') as f:
+#  f.write('%d' % t_max)
+#
+## T
+#with open('IC_No'+Q+'/t_No'+Q+'.txt', 'w') as f:
+#  f.write('%d' % t)
+#
+## dT
+#with open('IC_No'+Q+'/dT_No'+Q+'.txt', 'w') as f:
+#  f.write('%d' % dt_max)
+#
+## eta
+#with open('IC_No'+Q+'/eta_No'+Q+'.txt', 'w') as f:
+#  f.write('%f' % eta)
+#
+## e
+#with open('IC_No'+Q+'/e_No'+Q+'.txt', 'w') as f:
+#  f.write('%d' % e)
 
 # Earth - Sun IC
 
@@ -342,11 +320,11 @@ with open('IC_No'+Q+'/e_No'+Q+'.txt', 'w') as f:
 #
 #Mass = np.array([1.989e30, 5.972e24])
 #
-#Pos=np.zeros((Ns,3))
+#Pos = np.zeros((Ns,3))
 #
 #Pos[1] = np.array([0,AU,0])
 #
-#Vel=np.zeros((Ns,3)) 
+#Vel = np.zeros((Ns,3)) 
 #
 #V = 29754.7
 #

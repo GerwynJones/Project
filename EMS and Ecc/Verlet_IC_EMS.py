@@ -11,35 +11,31 @@ import scipy.constants as sc
 AU = sc.astronomical_unit
 Ms = 1.989e30
 Me = 5.972e24
-Mm = 7.342e22
-Year = 365.26*(24*60*60)*(1.001)
+Year = sc.Julian_year
+
 
 
 "Defining Variables"
 N = 2
-t_max = 1e3*Year; t = 0
-dt_max = t_max/5000
+t_max = 100*Year; t = 0
+dt_max = Year/5
 
-v =  29754.7
-m = 384399000; vm = v + 1022
+v = 29754.7
 
-mass = np.array([Ms,Me,Mm])
+mass = np.array([Ms,Me])
 
 pos = np.zeros((N,3))
 vel = np.zeros((N,3))
 
 pos[1] = np.array([0,AU,0])
-#pos[2] = np.array([0,AU + m,0])
 vel[1] = np.array([v,0,0])
-#vel[2] = np.array([vm,0,0])
 
-e = 0.0005*AU; n = 0.1
+e = 0.005*AU; n = 0.1
 
-a = []; Ka = []; Pa = []
-b = []; Kb = []; Pb = []
-c = []; Kc = []; Pc = []
+a = []; b = []
 
-Tsum = []
+ea = []; eb = []
 
-T = []; dT = []
+Tsum = []; T = []
+
 
