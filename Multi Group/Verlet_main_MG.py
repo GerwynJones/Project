@@ -61,7 +61,7 @@ def PE(Pos, Mass, e, Ns):
             magr = np.sqrt(inner1d(r, r))
 
             Pe[i] += -(G * Mass[j] * Mass[i]) / (magr + e)
-            Pe[j] += -(G * Mass[i] * Mass[j]) / (magr + e)  # Check PE
+#            Pe[j] += -(G * Mass[i] * Mass[j]) / (magr + e)  # Check PE
             
     return Pe
     

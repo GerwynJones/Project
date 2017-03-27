@@ -34,7 +34,7 @@ for j in range(len(P)):
             Position[i][j,:] = P[j][i,:]
             Energy[i,j] = E[j][i]
             Esum[k,j] = np.sum(E[j][O[k-1]:O[k]])
-            Time[j] = T[j]
+            Time[j] = T[j]/Year
     
         
 fig = plt.figure(1)
@@ -69,11 +69,20 @@ for k in range(Ng):
         j = i + 1
         
         plt.plot(Time, Energy[i,:]/Esum[k,:], label = 'star %s' % j)
-        
+    
+    plt.ylabel("Energy (Ratio)")    
     plt.xlabel("Time (yrs)")
     plt.legend(loc = 'best')
     
 #plt.savefig('Graphs/Graph of Energy MG.png', bbox_inches='tight')
+
+plt.figure()
+plt.plot(Time, N1); plt.plot(Time, N2)
+#plt.legend(["KE of Body 1","KE of Body 2","KE of Body 3","PE of Body 1","PE of Body 2"])
+plt.xlabel("Time (yrs)")
+plt.ylabel("Energy (J)")
+plt.title("Graph of Energy of system")
+
 
 plt.figure()
 plt.plot(Time, Esum[0,:])
@@ -82,12 +91,7 @@ plt.ylabel("Energy (J)")
 plt.title("Graph of Total energy of system")
 plt.show()
 
-plt.figure()
-plt.plot(Time, N1); plt.plot(Time, N2)
-plt.xlabel("Time (yrs)")
-plt.ylabel("Energy (J)")
-plt.title("Graph of Energy of system")
-plt.show()
+
 
 
 

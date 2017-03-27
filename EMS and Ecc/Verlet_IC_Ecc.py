@@ -18,6 +18,7 @@ Year = 365.26*(24*60*60)
 N = 2
 t_max = Year*(1.25e3)  #1.25e3 for dt_grav and .65e3 for dt_max
 dt_max = t_max/200
+t = 0
 
 V =  (2*np.pi*A)/(Year*(5.5e3))
 
@@ -31,9 +32,11 @@ vel[1] = np.array([V,0,0])
 
 e = 0.05*AU; n = 0.05
 
-a = []; Ta = []
-b = []; Tb = []
 
-Tsum = []
+a = []; b = []
 
-T = []; dT = []
+ea = []; eb = []
+
+Tsum = []; T = []
+
+N1 = []; N2 = []

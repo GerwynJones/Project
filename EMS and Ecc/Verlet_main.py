@@ -9,7 +9,7 @@ import numpy as np
 import scipy.constants as sc
 from numpy.core.umath_tests import inner1d
 
-from Verlet_IC_EMS import *
+from Verlet_IC_Ecc import *
 
 #####################
 
@@ -108,6 +108,9 @@ while t < t_max:
     eb.append(pe[1] + ke[1])
     Eb = np.asarray(eb)
     
+    N1.append(ke)
+    N2.append(pe)
+
     Tsum.append(np.sum(ke + pe)) 
     Esum =  np.asarray(Tsum)
     

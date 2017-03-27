@@ -6,6 +6,7 @@ Created on Thu Nov 24 22:29:44 2016
 """
 from __future__ import division
 import numpy as np 
+import math
 import scipy.constants as sc
 from numpy import linalg as LA
 #import h5py
@@ -32,23 +33,49 @@ t_max = 1e5*Year; t = 0; dt_max = Year/5
 # Initial Conditions
 
 # Constants
-e = 0.005*AU; eta = 0.1
+e = 0.05*AU; eta = 0.01
 
 ############################################
 
-def M(N, mean = np.log10(0.08), sigma = 0.69):
+def Salpeter(N, alpha, M_min, M_max):
+    # Convert limits from M to logM
+    log_M_Min = math.log(M_min, 10)
+    log_M_Max = math.log(M_max, 10)
+    #  Salpeter IMF maximum likelihood occurs at M_min
+    maxm = math.pow(M_min, 1.0 - alpha)
+
+    MList = []
+
+    while (len(MList) < N):
+        # Draw candidate from logM interval.
+        logM = np.random.uniform(log_M_Min,log_M_Max)
+        M = 10**logM
+        # Compute likelihood of candidate from Salpeter IMF
+        IMF = math.pow(M, 1.0 - alpha)
+
+        u = np.random.uniform(0.0, maxm)
+        
+        if (u < IMF):
+            
+            MList.append(M)
+            
+    Mass = np.array(MList)
+            
+    return Mass
+
+def M(N, Method):
+
+    alpha = 2.35
+    
+    M_min = 0.1
+    M_max = 100
 
     """ Mass """
     M0 = 1.989e30
-    Mass = np.zeros(N)
 
-    C = np.log(10)/(0.158*np.sqrt(2*np.pi)*sigma)
+    M = Method(N, alpha, M_min, M_max)
     
-    for i in xrange(N):
-        
-        M = 1 #np.log10(np.random.lognormal(mean, sigma)*C)
-    
-        Mass[i] = np.array([M*M0])
+    Mass = M*M0
 
     return Mass
 
@@ -77,7 +104,7 @@ def GroupP(Ng):
         
         elif O <= (PC-2*C)/C:
             
-            S = 2 #np.random.randint(3, 6)
+            S = np.random.randint(3, 6)
             
             N[i] = S
             
@@ -170,9 +197,9 @@ def NormV(Vel, Pos, Mass, N):
     
     Tot = (2*Ktot)/Ptot
     
-    l = np.random.uniform(0.9, 1)
+#    l = np.random.uniform(0.9, 1)
     
-    V = l*Vel/np.sqrt(Tot)
+    V = Vel/np.sqrt(Tot)
     
     return V
 
@@ -195,7 +222,7 @@ def IC(Ns, Ng, R, GroupPos, N):
         
         apos = np.zeros((a,3))
         avel = np.zeros((a,3))
-        amass = M(a)
+        amass = M(a, Salpeter)
         
         while i < a:
             i = i + 1
@@ -227,10 +254,12 @@ def IC(Ns, Ng, R, GroupPos, N):
     
         GV = NormV(avel, apos, amass, a) + GroupVel[j]
         
-        K.append(np.sum(KE(GV, amass, a)))
+        Velf = NormV(GV, apos, amass, a)
+        
+        K.append(np.sum(KE(Velf, amass, a)))
         P.append(np.sum(PE(apos, amass, e, a)))
         
-        V.append(GV)
+        V.append(Velf)
     
     return Pos, V, Mass, K, P
         
