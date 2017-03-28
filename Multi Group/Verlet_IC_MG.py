@@ -21,7 +21,7 @@ PC = 206265*AU
 R = 200*AU
 
 # No.Of.groups
-Ng = 1
+Ng = int(1e4)
 
 # Dumping Number
 Dump = 10
@@ -38,34 +38,89 @@ e = 0.05*AU; eta = 0.01
 ############################################
 
 def Salpeter(N, alpha, M_min, M_max):
-    # Convert limits from M to logM
+    # Convert limits from M to logM.
     log_M_Min = math.log(M_min, 10)
     log_M_Max = math.log(M_max, 10)
-    #  Salpeter IMF maximum likelihood occurs at M_min
-    maxm = math.pow(M_min, 1.0 - alpha)
 
+    C = 1.35
+
+    # Since Salpeter IMF decays, maximum likelihood occurs at M_min
+    maxm = math.pow(M_min, 1.0 - alpha)/C
+
+    # Prepare array for output masses.
     MList = []
 
     while (len(MList) < N):
         # Draw candidate from logM interval.
         logM = np.random.uniform(log_M_Min,log_M_Max)
-        M = 10**logM
-        # Compute likelihood of candidate from Salpeter IMF
-        IMF = math.pow(M, 1.0 - alpha)
 
+        M = 10**logM
+
+        # Compute likelihood of candidate from Salpeter SMF.
+        likelihood = math.pow(M, 1.0 - alpha)
+        # Random
         u = np.random.uniform(0.0, maxm)
-        
-        if (u < IMF):
-            
+
+        if (u < likelihood):
+
             MList.append(M)
-            
+
     Mass = np.array(MList)
-            
+
+    return Mass
+
+def Kroupa(N, alpha, M_min, M_max):
+    # Convert limits from M to logM.
+    log_M_Min = math.log(M_min, 10)
+    log_M_Max = math.log(M_max, 10)
+
+    alpha_1 = alpha[0]
+    alpha_2 = alpha[1]
+
+    C_1 = 0.35
+    C_2 = 1.35
+
+    # Since Kroupa IMF decays, maximum likelihood occurs at M_min
+    maxm_1 = math.pow(M_min, 1.0 - alpha_1)/C_1
+
+    maxm_2 = math.pow(M_min + 0.02, 1.0 - alpha_2)/C_2
+
+    # Prepare array for output masses.
+    MList = []
+
+    while (len(MList) < N):
+        # Draw candidate from logM interval.
+        logM = np.random.uniform(log_M_Min,log_M_Max)
+
+        M = 10**logM
+
+        if M <= 0.5:
+            # Compute likelihood of candidate from Kroupa IMF.
+            likelihood = math.pow(M, 1.0 - alpha_1)
+            # Random
+            u = np.random.uniform(0.0, maxm_1)
+
+            if (u < likelihood):
+
+                MList.append(M)
+
+        if M > 0.5:
+            # Compute likelihood of candidate from Kroupa IMF.
+            likelihood = math.pow(M, 1.0 - alpha_2)
+            # Random
+            u = np.random.uniform(0.0, maxm_2)
+
+            if (u < likelihood):
+
+                MList.append(M)
+
+    Mass = np.array(MList)
+
     return Mass
 
 def M(N, Method):
 
-    alpha = 2.35
+    alpha = np.array([1.35, 2.35])
     
     M_min = 0.1
     M_max = 100
@@ -81,7 +136,7 @@ def M(N, Method):
 
 def GroupP(Ng):
     
-    GroupPos = np.zeros((Ng,3))
+    GroupPos = np.zeros((Ng, 3))
     
     N = np.zeros(Ng)
     
@@ -104,7 +159,7 @@ def GroupP(Ng):
         
         elif O <= (PC-2*C)/C:
             
-            S = np.random.randint(3, 6)
+            S = 200  # np.random.randint(3, 6)
             
             N[i] = S
             
@@ -122,8 +177,8 @@ def GroupP(Ng):
             GroupPos[i] = np.array([X,Y,Z])
 
         elif O > (PC-2*C)/C:
-            
-            S = np.random.randint(3, 6)
+
+            S = 200  # np.random.randint(3, 6)
             
             N[i] = S
             
@@ -144,7 +199,7 @@ def GroupP(Ng):
 
 def GroupV(Ng):
     
-    Vel = np.zeros((Ng,3))
+    Vel = np.zeros((Ng, 3))
     V = np.zeros(Ng)
     
     for i in xrange(Ng):
@@ -181,7 +236,7 @@ def KE(Vel, Mass, N):
     
     Ke = np.zeros(N)
     
-    for i in xrange(0,N):
+    for i in xrange(0, N):
         modv = LA.norm(Vel[i])
         Ke[i] = .5*Mass[i]*modv**2
 
@@ -197,8 +252,6 @@ def NormV(Vel, Pos, Mass, N):
     
     Tot = (2*Ktot)/Ptot
     
-#    l = np.random.uniform(0.9, 1)
-    
     V = Vel/np.sqrt(Tot)
     
     return V
@@ -208,7 +261,7 @@ def NormV(Vel, Pos, Mass, N):
 def IC(Ns, Ng, R, GroupPos, N):
     """ Creating the initial conditions with random points within a cylinder """    
     
-    Pos = np.zeros((Ns,3))
+    Pos = np.zeros((Ns, 3))
     V = []
     K = []
     P = []
@@ -220,9 +273,11 @@ def IC(Ns, Ng, R, GroupPos, N):
         i = -1
         a = int(N[j])
         
-        apos = np.zeros((a,3))
-        avel = np.zeros((a,3))
-        amass = M(a, Salpeter)
+        apos = np.zeros((a, 3))
+        avel = np.zeros((a, 3))
+
+        """ Creating masses from either Salpeter or Kroupa"""
+        amass = M(a, Kroupa)
         
         while i < a:
             i = i + 1
@@ -237,10 +292,10 @@ def IC(Ns, Ng, R, GroupPos, N):
                 break
                  
             elif np.sqrt(X**2 + Y**2 + Z**2) <= R:
-                apos[i] = np.array([X,Y,Z])
+                apos[i] = np.array([X, Y, Z])
                 Pos[O] = apos[i] + GroupPos[j]
                 
-                Vx, Vy, Vz = np.random.uniform(-1,1,3)
+                Vx, Vy, Vz = np.random.uniform(-1, 1, 3)
         
                 avel[i] = np.array([Vx, Vy, Vz])
                 
@@ -267,7 +322,7 @@ def IC(Ns, Ng, R, GroupPos, N):
 def IV(V, Ng, Ns, N):
     """ Converting the Velocity array into something the loop can use """
     
-    Vel = np.zeros((Ns,3))
+    Vel = np.zeros((Ns, 3))
     
     O = -1
     
@@ -276,7 +331,7 @@ def IV(V, Ng, Ns, N):
         for k in xrange(a):
             O = O + 1
             
-            Vel[O] = V[j][k,:]
+            Vel[O] = V[j][k, :]
             
     return Vel
 
@@ -288,6 +343,41 @@ Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R, GroupPos, N)
 
 Vel = IV(V, Ng, Ns, N)
 
+
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+
+plt.close('all')
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+plt.plot(Pos[:, 0], Pos[:, 1], Pos[:, 2], color='green', linestyle='None', marker='.')
+
+plt.xlabel("")
+plt.legend(loc='best')
+
+
+fig = plt.figure()
+
+plt.plot(Pos[:, 0]/PC, Pos[:, 1]/PC, color='green', linestyle='None', marker='.')
+
+plt.xlabel("Distance (Pc)")
+plt.ylabel("Distance (Pc)")
+plt.legend(loc='best')
+plt.savefig('Graphs/Graph of IC Cylinder_2.png', bbox_inches='tight')
+
+
+fig = plt.figure()
+
+plt.plot(Pos[:, 1]/PC, Pos[:, 2]/PC, color='green', linestyle='None', marker='.')
+
+plt.xlabel("Distance (Pc)")
+plt.ylabel("Distance (Pc)")
+plt.legend(loc='best')
+plt.savefig('Graphs/Graph of IC Circle_2.png', bbox_inches='tight')
+
+plt.show()
 
 # Dumping Data into Files
 
@@ -342,6 +432,8 @@ Vel = IV(V, Ng, Ns, N)
 ## e
 #with open('IC_No'+Q+'/e_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % e)
+
+
 
 # Earth - Sun IC
 

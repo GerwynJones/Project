@@ -10,7 +10,6 @@ import numpy as np
 import scipy.constants as sc
 from numpy.core.umath_tests import inner1d
 
-
 from Verlet_IC_MG import *
 
 ##################################################

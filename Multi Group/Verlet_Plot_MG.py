@@ -17,9 +17,9 @@ plt.close('all')
 
 print("Starting Plot File")
 
-Position = np.zeros((Ns,len(P),3))
-Energy = np.zeros((Ns,len(P)))
-Esum = np.zeros((Ng,len(P)))
+Position = np.zeros((Ns, len(P), 3))
+Energy = np.zeros((Ns, len(P)))
+Esum = np.zeros((Ng, len(P)))
 Time = np.zeros(len(P))
 
 T_max = np.max(dT) 
@@ -31,9 +31,9 @@ for j in range(len(P)):
     for k in range(Ng): 
         for i in range(Ns):
             O[k] = O[k-1] + N[k]
-            Position[i][j,:] = P[j][i,:]
-            Energy[i,j] = E[j][i]
-            Esum[k,j] = np.sum(E[j][O[k-1]:O[k]])
+            Position[i][j, :] = P[j][i, :]
+            Energy[i, j] = E[j][i]
+            Esum[k, j] = np.sum(E[j][O[k-1]:O[k]])
             Time[j] = T[j]/Year
     
         
@@ -41,21 +41,21 @@ fig = plt.figure(1)
 ax = fig.add_subplot(111, projection='3d')          
         
 for i in range(Ns):    
-    plt.plot(Position[i][:,0],Position[i][:,1],Position[i][:,2]) 
+    plt.plot(Position[i][:, 0], Position[i][:, 1], Position[i][:, 2])
 
 plt.xlabel("x")
-plt.legend(loc = 'best')
+plt.legend(loc='best')
 
 plt.figure()
 
 for i in range(Ns):    
     j = i + 1
-    plt.plot(Position[i][:,0],Position[i][:,1])
+    plt.plot(Position[i][:, 0], Position[i][:, 1])
     
 plt.ylabel(r'Distance $(AU)$')
 plt.xlabel(r'Distance $(AU)$')
 #plt.savefig('Graphs/Graph of 2D MG.png', bbox_inches='tight')
-plt.legend(loc = 'best')
+plt.legend(loc='best')
 
 
 O = np.zeros(Ng + 1)
@@ -68,11 +68,11 @@ for k in range(Ng):
         
         j = i + 1
         
-        plt.plot(Time, Energy[i,:]/Esum[k,:], label = 'star %s' % j)
+        plt.plot(Time, Energy[i, :]/Esum[k, :], label='star %s' % j)
     
     plt.ylabel("Energy (Ratio)")    
     plt.xlabel("Time (yrs)")
-    plt.legend(loc = 'best')
+    plt.legend(loc='best')
     
 #plt.savefig('Graphs/Graph of Energy MG.png', bbox_inches='tight')
 
