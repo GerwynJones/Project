@@ -9,31 +9,29 @@ import numpy as np
 import math
 import scipy.constants as sc
 from numpy import linalg as LA
-#import h5py
+# import h5py
 
 ###############################################
 
 # Defining Variables
-
 # Size
 AU = sc.astronomical_unit
 PC = 206265*AU
 R = 200*AU
 
 # No.Of.groups
-Ng = int(1e4)
+Ng = 10
 
 # Dumping Number
-Dump = 10
+Dump = 50
 
 # Duration
 Year = sc.Julian_year
-t_max = 1e5*Year; t = 0; dt_max = Year/5
+t_max = 1e6*Year; t = 0; dt_max = 1.5*Year
 
 # Initial Conditions
-
 # Constants
-e = 0.05*AU; eta = 0.01
+e = 0.05*AU; eta = 5
 
 ############################################
 
@@ -82,7 +80,6 @@ def Kroupa(N, alpha, M_min, M_max):
 
     # Since Kroupa IMF decays, maximum likelihood occurs at M_min
     maxm_1 = math.pow(M_min, 1.0 - alpha_1)/C_1
-
     maxm_2 = math.pow(M_min + 0.02, 1.0 - alpha_2)/C_2
 
     # Prepare array for output masses.
@@ -159,7 +156,7 @@ def GroupP(Ng):
         
         elif O <= (PC-2*C)/C:
             
-            S = 200  # np.random.randint(3, 6)
+            S = np.random.randint(3, 6)
             
             N[i] = S
             
@@ -174,11 +171,11 @@ def GroupP(Ng):
             Y = np.sqrt(D) * np.cos(phi)
             Z = np.sqrt(D) * np.sin(phi)
             
-            GroupPos[i] = np.array([X,Y,Z])
+            GroupPos[i] = np.array([X, Y, Z])
 
         elif O > (PC-2*C)/C:
 
-            S = 200  # np.random.randint(3, 6)
+            S = np.random.randint(3, 6)
             
             N[i] = S
             
@@ -193,7 +190,7 @@ def GroupP(Ng):
             Y = np.sqrt(D) * np.cos(phi)
             Z = np.sqrt(D) * np.sin(phi)
             
-            GroupPos[i] = np.array([X,Y,Z])
+            GroupPos[i] = np.array([X, Y, Z])
             
     return GroupPos, Ns, N
 
@@ -206,7 +203,7 @@ def GroupV(Ng):
         
         Vgroup = 0.2e3
         
-        Vx, Vy, Vz = np.random.uniform(-1,1,3) 
+        Vx, Vy, Vz = np.random.uniform(-1, 1, 3)
         
         C = Vgroup / np.sqrt(Vx**2 + Vy**2 + Vz**2)
     
@@ -228,7 +225,7 @@ def PE(Pos, Mass, e, N):
             m = LA.norm(r)
             
             Pe[i] += -(G*Mass[i]*Mass[j])/(m+e) # Check Pe
-            Pe[j] += -(G*Mass[j]*Mass[i])/(m+e)
+#            Pe[j] += -(G*Mass[j]*Mass[i])/(m+e)
 
     return Pe
 
@@ -258,7 +255,7 @@ def NormV(Vel, Pos, Mass, N):
 
 ########################################################
 
-def IC(Ns, Ng, R, GroupPos, N):
+def IC(Ns, Ng, R, GroupPos, N, Method):
     """ Creating the initial conditions with random points within a cylinder """    
     
     Pos = np.zeros((Ns, 3))
@@ -277,7 +274,7 @@ def IC(Ns, Ng, R, GroupPos, N):
         avel = np.zeros((a, 3))
 
         """ Creating masses from either Salpeter or Kroupa"""
-        amass = M(a, Kroupa)
+        amass = M(a, Method)
         
         while i < a:
             i = i + 1
@@ -339,114 +336,84 @@ def IV(V, Ng, Ns, N):
  
 GroupPos, Ns, N = GroupP(Ng)
 
-Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R, GroupPos, N)
+Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R, GroupPos, N, Kroupa)
 
 Vel = IV(V, Ng, Ns, N)
 
 
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-
-plt.close('all')
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-plt.plot(Pos[:, 0], Pos[:, 1], Pos[:, 2], color='green', linestyle='None', marker='.')
-
-plt.xlabel("")
-plt.legend(loc='best')
 
 
-fig = plt.figure()
-
-plt.plot(Pos[:, 0]/PC, Pos[:, 1]/PC, color='green', linestyle='None', marker='.')
-
-plt.xlabel("Distance (Pc)")
-plt.ylabel("Distance (Pc)")
-plt.legend(loc='best')
-plt.savefig('Graphs/Graph of IC Cylinder_2.png', bbox_inches='tight')
 
 
-fig = plt.figure()
-
-plt.plot(Pos[:, 1]/PC, Pos[:, 2]/PC, color='green', linestyle='None', marker='.')
-
-plt.xlabel("Distance (Pc)")
-plt.ylabel("Distance (Pc)")
-plt.legend(loc='best')
-plt.savefig('Graphs/Graph of IC Circle_2.png', bbox_inches='tight')
-
-plt.show()
 
 # Dumping Data into Files
 
 # File No.
 
-#Q = str( 1 )
+# Q = str( 1 )
 #
-## Position
-#with h5py.File('IC_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
+# # Position
+# with h5py.File('IC_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
 #    hf.create_dataset("Position_Data",  data=Pos)
 #
-## Velocity
-#with h5py.File('IC_No'+Q+'/Velocity_No'+Q+'.h5', 'w') as hf:
+# # Velocity
+# with h5py.File('IC_No'+Q+'/Velocity_No'+Q+'.h5', 'w') as hf:
 #    hf.create_dataset("Velocity_Data",  data=Vel)
 #    
-## Mass
-#with h5py.File('IC_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
+# # Mass
+# with h5py.File('IC_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
 #   hf.create_dataset("Mass_Data",  data=Mass)
 #
-## N
-#with h5py.File('IC_No'+Q+'/N_No'+Q+'.h5', 'w') as hf:
+# # N
+# with h5py.File('IC_No'+Q+'/N_No'+Q+'.h5', 'w') as hf:
 #   hf.create_dataset("N_Data",  data=N)
 #
-## NGroup
-#with open('IC_No'+Q+'/Ng_No'+Q+'.txt', 'w') as f:
+# # NGroup
+# with open('IC_No'+Q+'/Ng_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % Ng)
 #
-## Ns
-#with open('IC_No'+Q+'/Ns_No'+Q+'.txt', 'w') as f:
+# # Ns
+# with open('IC_No'+Q+'/Ns_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % Ns)
 #
-## Dump
-#with open('IC_No'+Q+'/Dump_No'+Q+'.txt', 'w') as f:
+# # Dump
+# with open('IC_No'+Q+'/Dump_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % Dump)
 #
-## T_max
-#with open('IC_No'+Q+'/Tmax_No'+Q+'.txt', 'w') as f:
+# # T_max
+# with open('IC_No'+Q+'/Tmax_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % t_max)
 #
-## T
-#with open('IC_No'+Q+'/t_No'+Q+'.txt', 'w') as f:
+# # T
+# with open('IC_No'+Q+'/t_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % t)
 #
-## dT
-#with open('IC_No'+Q+'/dT_No'+Q+'.txt', 'w') as f:
+# # dT
+# with open('IC_No'+Q+'/dT_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % dt_max)
 #
-## eta
-#with open('IC_No'+Q+'/eta_No'+Q+'.txt', 'w') as f:
+# # eta
+# with open('IC_No'+Q+'/eta_No'+Q+'.txt', 'w') as f:
 #  f.write('%f' % eta)
 #
-## e
-#with open('IC_No'+Q+'/e_No'+Q+'.txt', 'w') as f:
+# # e
+# with open('IC_No'+Q+'/e_No'+Q+'.txt', 'w') as f:
 #  f.write('%d' % e)
 
 
 
-# Earth - Sun IC
+# Earth-Sun IC
 
-#Ns = 2; N = np.array([2])
+# Ns = 2; N = np.array([2])
 #
-#Mass = np.array([1.989e30, 5.972e24])
+# Mass = np.array([1.989e30, 5.972e24])
 #
-#Pos = np.zeros((Ns,3))
+# Pos = np.zeros((Ns,3))
 #
-#Pos[1] = np.array([0,AU,0])
+# Pos[1] = np.array([0,AU,0])
 #
-#Vel = np.zeros((Ns,3)) 
+# Vel = np.zeros((Ns,3))
 #
-#V = 29754.7
+# V = 29754.7
 #
-#Vel[1] = np.array([V,0,0])
+# Vel[1] = np.array([V,0,0])
