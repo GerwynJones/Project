@@ -15,7 +15,7 @@ from Verlet_main_MG import *
 
 # Dumping Data into Files
 # File No.
-Q = str(3)
+Q = str(4)
 plt.close('all')
 
 print("Starting Plot File")
@@ -29,10 +29,10 @@ Energy = np.zeros((Ns, len(P)))
 Esum = np.zeros((Ng, len(P)))
 Time = np.zeros(len(P))
 
-for j in range(len(P)):
+for j in xrange(len(P)):
     O = np.zeros(Ng+1)
-    for k in range(Ng): 
-        for i in range(Ns):
+    for k in xrange(Ng):
+        for i in xrange(Ns):
             O[k] = O[k-1] + N[k]
             Position[i][j, :] = (P[j][i, :])/PC
             Energy[i, j] = E[j][i]
@@ -43,7 +43,7 @@ for j in range(len(P)):
 fig = plt.figure(1)
 ax = fig.add_subplot(111, projection='3d')          
         
-for i in range(Ns):    
+for i in xrange(Ns):
     plt.plot(Position[i][:, 0], Position[i][:, 1], Position[i][:, 2])
 
 plt.xlabel("x")
@@ -52,38 +52,38 @@ plt.legend(loc='best')
 
 plt.figure()
 
-for i in range(Ns):    
+for i in xrange(Ns):
     j = i + 1
     plt.plot(Position[i][:, 0], Position[i][:, 1])
     
 plt.ylabel(r'Distance $(Pc)$')
 plt.xlabel(r'Distance $(Pc)$')
-plt.savefig('Graphs/Graph of 2D MG '+Q+'.png', bbox_inches='tight')
+plt.savefig('Graphs/Graph of 2D MG NO_'+Q+'.png', bbox_inches='tight')
 plt.legend(loc='best')
 
 
 O = np.zeros(Ng + 1)
-for k in range(Ng):
+for k in xrange(Ng):
     plt.figure()
-    for i in range(int(N[k])):
+    l = str(k + 1)
+    for i in xrange(int(N[k])):
         O[k] = O[k-1] + N[k]
         i = i + O[k-1]
         j = i + 1
         
         plt.plot(Time, Energy[i, :], label='star %s' % j)
-    
-    plt.ylabel("Energy (Ratio)")    
+    plt.ylabel("Energy (J)")
     plt.xlabel("Time (yrs)")
     plt.legend(loc='best')
-    plt.savefig('Graphs/Graph of Energy MG '+k+' '+Q+'.png', bbox_inches='tight')
+    plt.savefig('Graphs/Graph of Energy MG for group '+l+' NO_'+Q+'.png', bbox_inches='tight')
 
+    plt.figure()
+    plt.plot(Time, Esum[k, :])
+    plt.xlabel("Time (yrs)")
+    plt.ylabel("Energy (J)")
+    plt.title("Graph of Total energy of system")
+    plt.savefig('Graphs/Graph of Total energy of system for group '+l+' NO_'+Q+'.png', bbox_inches='tight')
 
-plt.figure()
-plt.plot(Time, Esum[0, :])
-plt.xlabel("Time (yrs)")
-plt.ylabel("Energy (J)")
-plt.title("Graph of Total energy of system")
-plt.savefig('Graphs/Graph of Total energy of system '+Q+'.png', bbox_inches='tight')
 plt.show()
 
 # Position
