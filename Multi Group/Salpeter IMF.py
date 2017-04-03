@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 """
 Created on Fri Mar 24 21:46:00 2017
 
@@ -27,7 +27,7 @@ def Salpeter(N, alpha, M_min, M_max):
     # Prepare array for output masses.
     MList = []
 
-    while (len(MList) < N):
+    while len(MList) < N:
         # Draw candidate from logM interval.
         logM = random.uniform(log_M_Min,log_M_Max)
         
@@ -38,7 +38,7 @@ def Salpeter(N, alpha, M_min, M_max):
         # Random
         u = random.uniform(0.0, maxm)
 
-        if (u < likelihood):
+        if u < likelihood:
 
             MList.append(M)
 
@@ -47,35 +47,34 @@ def Salpeter(N, alpha, M_min, M_max):
     return Mass
     
 # Draw samples.
-Mass = Salpeter(1e6, 2.35, 0.4, 100.0)
+Mass = Salpeter(1e6, 2.35, 0.09, 100.0)
 # Convert to logM.
 LogMass = numpy.log10(Mass)
 
 # Plot distribution.
 plt.figure(1)
-plt.hist(LogMass, 200, log=True,
-         range=(math.log(0.4, 10), math.log(100.0, 10)))
+plt.hist(LogMass, 100, log=True,
+         range=(math.log(0.09, 10), math.log(100.0, 10)))
          
 # Overplot with Salpeter IMF.
-
 X = []
 Y = []
 
-logM = numpy.linspace(math.log(0.4, 10), math.log(100, 10),100)
+logM = numpy.linspace(math.log(0.09, 10), math.log(100, 10), 100)
 
 for n in range(len(logM)):
     C = 1.35
 
     x    = 10**(logM[n])
-    y    = 1.5e4*math.pow(x, 1.0 - 2.35)/C  # normalisation
+    y    = 9.e3*math.pow(x, 1.0 - 2.35)/C  # normalisation
     X.append(logM[n])
     Y.append(y)
 
-plt.plot(X, Y, '-', lw=3, color='red')
-plt.xlim(math.log(0.5, 10), math.log(100.0, 10))
-plt.xlabel(r'$\log M$', fontsize=15)
-plt.ylabel('PDF', fontsize=15)
+plt.plot(X, Y, '-', lw=5, color='red')
+plt.xlim(math.log(0.1, 10), math.log(100.0, 10))
+plt.xlabel(r'$\log M$', fontsize=18)
+plt.ylabel('PDF', fontsize=18)
 
-plt.savefig('Graphs/Salpeter_IMF.png', bbox_inches='tight')
+plt.savefig('Initial conditions/Salpeter_IMF.png', bbox_inches='tight')
 
 plt.show()

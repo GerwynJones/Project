@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 """
 Created on Fri Mar 24 21:46:00 2017
 
@@ -33,7 +33,7 @@ def Kroupa(N, alpha, M_min, M_max):
     # Prepare array for output masses.
     MList = []
 
-    while (len(MList) < N):
+    while len(MList) < N:
         # Draw candidate from logM interval.
         logM = random.uniform(log_M_Min,log_M_Max)
 
@@ -55,7 +55,7 @@ def Kroupa(N, alpha, M_min, M_max):
             # Random
             u = random.uniform(0.0, maxm_2)
 
-            if (u < likelihood):
+            if u < likelihood:
 
                 MList.append(M)
 
@@ -70,40 +70,38 @@ LogMass = numpy.log10(Mass)
 
 # Plot distribution.
 plt.figure(1)
-plt.hist(LogMass, 200, log=True,
+plt.hist(LogMass, 100, log=True,
          range=(math.log(0.1, 10), math.log(100.0, 10)))
 
 # Overplot with Kroupa IMF.
-
 X = []
 Y = []
 
-logM = numpy.linspace(math.log(0.1, 10), math.log(100, 10),100)
+logM = numpy.linspace(math.log(0.1, 10), math.log(100, 10), 100)
 
 for n in range(len(logM)):
-
     C_1 = 0.3
     C_2 = 1.3
 
     if logM[n] <= math.log(0.5, 10):
 
-        x    = 10**(logM[n])
-        y    = 3.e3*math.pow(x, 1.0 - 1.3)/C_1  # normalisation
+        x    = 9.5**(logM[n])
+        y    = 7e3*math.pow(x, 1.0 - 1.3)/C_1  # normalisation
         X.append(logM[n])
         Y.append(y)
 
     if logM[n] > math.log(0.5, 10):
 
         x    = 10**(logM[n])
-        y    = 6.5e3*math.pow(x, 1.0 - 2.3)/C_2  # normalisation
+        y    = 15.5e3*math.pow(x, 1.0 - 2.3)/C_2  # normalisation
         X.append(logM[n])
         Y.append(y)
 
-plt.plot(X, Y, '-', lw=2, color='red')
+plt.plot(X, Y, '-', lw=5, color='red')
 plt.xlim(math.log(0.1, 10),math.log(100.0, 10))
-plt.xlabel(r'$\log M$', fontsize=15)
-plt.ylabel('PDF', fontsize=15)
+plt.xlabel(r'$\log M$', fontsize=18)
+plt.ylabel('PDF', fontsize=18)
 
-#plt.savefig('Graphs/Kroupa_IMF.png', bbox_inches='tight')
+plt.savefig('Initial conditions/Kroupa_IMF.png', bbox_inches='tight')
 
 plt.show()
