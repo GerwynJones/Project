@@ -15,7 +15,7 @@ from Verlet_main_MG import *
 
 # Dumping Data into Files
 # File No.
-Q = str(4)
+Q = str(6)
 plt.close('all')
 
 print("Starting Plot File")
@@ -81,28 +81,27 @@ for k in xrange(Ng):
     plt.plot(Time, Esum[k, :])
     plt.xlabel("Time (yrs)")
     plt.ylabel("Energy (J)")
-    plt.title("Graph of Total energy of system")
     plt.savefig('Graphs/Graph of Total energy of system for group '+l+' NO_'+Q+'.png', bbox_inches='tight')
 
 plt.show()
 
 # Position
-with h5py.File('Data_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
+with h5py.File('/home/gerwyn/Documents/Project-Large-Files/Data_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
     hf.create_dataset("Position_Data",  data=Position)
 
 # Energies
-with h5py.File('Data_No'+Q+'/Energies_No'+Q+'.h5', 'w') as hf:
+with h5py.File('/home/gerwyn/Documents/Project-Large-Files/Data_No'+Q+'/Energies_No'+Q+'.h5', 'w') as hf:
     hf.create_dataset("Energy_Data",  data=Energy)
 
-with h5py.File('Data_No'+Q+'/Energy_Sum_No'+Q+'.h5', 'w') as hf:
+with h5py.File('/home/gerwyn/Documents/Project-Large-Files/Data_No'+Q+'/Energy_Sum_No'+Q+'.h5', 'w') as hf:
     hf.create_dataset("Esum_Data",  data=Esum)
 
 # Time
-with h5py.File('Data_No'+Q+'/Time_No'+Q+'.h5', 'w') as hf:
+with h5py.File('/home/gerwyn/Documents/Project-Large-Files/Data_No'+Q+'/Time_No'+Q+'.h5', 'w') as hf:
     hf.create_dataset("Time_Data",  data=Time)
 
 # Mass
-with h5py.File('Data_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
+with h5py.File('/home/gerwyn/Documents/Project-Large-Files/Data_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
     hf.create_dataset("Mass_Data",  data=Mass)
 
 Year = sc.Julian_year
@@ -116,5 +115,5 @@ ST = np.array(['T Min', 'T Max', 'T Ratio'])
 
 LoadTime = np.column_stack((ST, TR))
 
-np.savetxt('Data_No'+Q+'/Time.txt', LoadTime, delimiter=" ", fmt="%s")
+np.savetxt('/home/gerwyn/Documents/Project-Large-Files/Data_No'+Q+'/Time.txt', LoadTime, delimiter=" ", fmt="%s")
 

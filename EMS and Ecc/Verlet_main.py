@@ -9,7 +9,7 @@ import numpy as np
 import scipy.constants as sc
 from numpy.core.umath_tests import inner1d
 
-from Verlet_IC_Ecc import *
+from Verlet_IC_EMS import *
 
 #####################
 
@@ -58,7 +58,7 @@ def PE(pos, mass, e):
             magr = np.sqrt(inner1d(r, r))
 
             pe[i] += -(G * mass[j] * mass[i]) / (magr + e)
-            pe[j] += -(G * mass[i] * mass[j]) / (magr + e)  # Check PE
+#            pe[j] += -(G * mass[i] * mass[j]) / (magr + e)  # Check PE
             
     return pe
 
@@ -80,7 +80,7 @@ while t < t_max:
     
     a_o = np.sqrt(inner1d(ac, ac))
     
-    dt_grav =  np.min([dt_max, np.sqrt((2*n*e)/np.max(a_o))])
+    dt_grav = np.min([dt_max, np.sqrt((2*n*e)/np.max(a_o))])
 
     print(t/t_max)*100 
     T.append(t + dt_grav)
@@ -102,17 +102,18 @@ while t < t_max:
     A = np.asarray(a)
     b.append(pos[1])
     B = np.asarray(b)
-    
+    c.append(pos[2])
+    C = np.asarray(c)
+
     ea.append(pe[0] + ke[0])
     Ea = np.asarray(ea)
     eb.append(pe[1] + ke[1])
     Eb = np.asarray(eb)
-    
-    N1.append(ke)
-    N2.append(pe)
+    ec.append(pe[2] + ke[2])
+    Ec = np.asarray(ec)
 
     Tsum.append(np.sum(ke + pe)) 
-    Esum =  np.asarray(Tsum)
+    Esum = np.asarray(Tsum)
     
     if t == t_max:
         break

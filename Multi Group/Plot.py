@@ -34,6 +34,6 @@ for k in xrange(int(Ns)):
     plt.ylabel("Energy (Ratio)")
     plt.xlabel("Time (yrs)")
     plt.legend(loc='best')
-    plt.savefig('Graphs_'+Q+'/Graph of plot '+l+' '+Q+'.png', bbox_inches='tight')
+    plt.savefig('/home/gerwyn/Documents/Project-Large-Files/Graph.png', bbox_inches='tight')
 
 

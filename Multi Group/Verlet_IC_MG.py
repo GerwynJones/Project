@@ -20,10 +20,10 @@ PC = 206265*AU
 R = 200*AU
 
 # No.Of.groups
-Ng = 10
+Ng = int(1e3)  #10
 
 # Dumping Number
-Dump = 50
+Dump = 25
 
 # Duration
 Year = sc.Julian_year
@@ -156,7 +156,7 @@ def GroupP(Ng):
         
         elif O <= (PC-2*C)/C:
             
-            S = np.random.randint(3, 6)
+            S = 200  #np.random.randint(3, 6)
             
             N[i] = S
             
@@ -175,7 +175,7 @@ def GroupP(Ng):
 
         elif O > (PC-2*C)/C:
 
-            S = np.random.randint(3, 6)
+            S = 200  #np.random.randint(3, 6)
             
             N[i] = S
             
@@ -342,6 +342,41 @@ Vel = IV(V, Ng, Ns, N)
 
 
 
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+
+plt.close('all')
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+ax.plot(Pos[:, 0]/PC, Pos[:, 1]/PC, Pos[:, 2]/PC, color='green', linestyle='None', marker='.')
+
+ax.set_xlabel("Distance (Pc)", fontsize=14)
+ax.set_ylabel("Distance (Pc)", fontsize=14)
+ax.set_zlabel("Distance (Pc)", fontsize=14)
+plt.legend(loc='best')
+
+fig = plt.figure()
+
+plt.plot(Pos[:, 0]/PC, Pos[:, 1]/PC, color='green', linestyle='None', marker='.', markersize=9)
+
+plt.xlabel("Distance (Pc)", fontsize=18)
+plt.ylabel("Distance (Pc)", fontsize=18)
+plt.legend(loc='best')
+plt.savefig('Graphs/Graph of IC Cylinder_BOLD.png', bbox_inches='tight')
+
+
+fig = plt.figure()
+
+plt.plot(Pos[:, 1]/PC, Pos[:, 2]/PC, color='green', linestyle='None', marker='.', markersize=9)
+
+plt.xlabel("Distance (Pc)", fontsize=18)
+plt.ylabel("Distance (Pc)", fontsize=18)
+plt.legend(loc='best')
+plt.savefig('Graphs/Graph of IC Circle_BOLD.png', bbox_inches='tight')
+
+plt.show()
 
 
 
