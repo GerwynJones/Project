@@ -20,7 +20,7 @@ PC = 206265*AU
 R = 200*AU
 
 # No.Of.groups
-Ng = int(2e3)  #10
+Ng = 10
 
 # Dumping Number
 Dump = 25
@@ -32,6 +32,9 @@ t_max = 1e6*Year; t = 0; dt_max = 1.5*Year
 # Initial Conditions
 # Constants
 e = 0.05*AU; eta = 5
+
+# Type
+Virial = 1/2
 
 ############################################
 
@@ -156,7 +159,7 @@ def GroupP(Ng):
         
         elif O <= (PC-2*C)/C:
             
-            S = 200  #np.random.randint(3, 6)
+            S = np.random.randint(3, 6)
             
             N[i] = S
             
@@ -175,7 +178,7 @@ def GroupP(Ng):
 
         elif O > (PC-2*C)/C:
 
-            S = 200  #np.random.randint(3, 6)
+            S = np.random.randint(3, 6)
             
             N[i] = S
             
@@ -224,8 +227,7 @@ def PE(Pos, Mass, e, N):
             r = Pos[i]-Pos[j]
             m = LA.norm(r)
             
-            Pe[i] += -(G*Mass[i]*Mass[j])/(m+e) # Check Pe
-#            Pe[j] += -(G*Mass[j]*Mass[i])/(m+e)
+            Pe[i] += -(G*Mass[i]*Mass[j])/(m+e)  # Check Pe
 
     return Pe
 
@@ -239,7 +241,7 @@ def KE(Vel, Mass, N):
 
     return Ke
   
-def NormV(Vel, Pos, Mass, N):
+def NormV(Vel, Pos, Mass, N, Type):
     
     Ptot = np.sum(-PE(Pos, Mass, e, N))        
     
@@ -247,7 +249,7 @@ def NormV(Vel, Pos, Mass, N):
     
     Ktot = np.sum(KE(Vel, Mass, N))
     
-    Tot = (2*Ktot)/Ptot
+    Tot = Ktot/(Ptot*Type)
     
     V = Vel/np.sqrt(Tot)
     
@@ -255,7 +257,7 @@ def NormV(Vel, Pos, Mass, N):
 
 ########################################################
 
-def IC(Ns, Ng, R, GroupPos, N, Method):
+def IC(Ns, Ng, N, R, GroupPos, Method, Type):
     """ Creating the initial conditions with random points within a cylinder """    
     
     Pos = np.zeros((Ns, 3))
@@ -304,9 +306,9 @@ def IC(Ns, Ng, R, GroupPos, N, Method):
                
         GroupVel = GroupV(Ng)
     
-        GV = NormV(avel, apos, amass, a) + GroupVel[j]
+        GV = NormV(avel, apos, amass, a, Type) + GroupVel[j]
         
-        Velf = NormV(GV, apos, amass, a)
+        Velf = NormV(GV, apos, amass, a, Type)
         
         K.append(np.sum(KE(Velf, amass, a)))
         P.append(np.sum(PE(apos, amass, e, a)))
@@ -336,10 +338,9 @@ def IV(V, Ng, Ns, N):
  
 GroupPos, Ns, N = GroupP(Ng)
 
-Pos, V, Mass, KinE, PotE = IC(Ns, Ng, R, GroupPos, N, Kroupa)
+Pos, V, Mass, KinE, PotE = IC(Ns, Ng, N, R, GroupPos, Kroupa, Virial)
 
 Vel = IV(V, Ng, Ns, N)
-
 
 
 # Dumping Data into Files

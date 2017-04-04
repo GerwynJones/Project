@@ -15,7 +15,8 @@ from Verlet_main_MG import *
 
 # Dumping Data into Files
 # File No.
-Q = str(6)
+Q = str(7)
+
 plt.close('all')
 
 print("Starting Plot File")
@@ -46,7 +47,9 @@ ax = fig.add_subplot(111, projection='3d')
 for i in xrange(Ns):
     plt.plot(Position[i][:, 0], Position[i][:, 1], Position[i][:, 2])
 
-plt.xlabel("x")
+ax.set_xlabel("Distance (Pc)", fontsize=14)
+ax.set_ylabel("Distance (Pc)", fontsize=14)
+ax.set_zlabel("Distance (Pc)", fontsize=14)
 plt.legend(loc='best')
 
 
@@ -56,8 +59,8 @@ for i in xrange(Ns):
     j = i + 1
     plt.plot(Position[i][:, 0], Position[i][:, 1])
     
-plt.ylabel(r'Distance $(Pc)$')
-plt.xlabel(r'Distance $(Pc)$')
+plt.ylabel(r'Distance $(Pc)$', fontsize=14)
+plt.xlabel(r'Distance $(Pc)$', fontsize=14)
 plt.savefig('Graphs/Graph of 2D MG NO_'+Q+'.png', bbox_inches='tight')
 plt.legend(loc='best')
 
@@ -72,15 +75,15 @@ for k in xrange(Ng):
         j = i + 1
         
         plt.plot(Time, Energy[i, :], label='star %s' % j)
-    plt.ylabel("Energy (J)")
-    plt.xlabel("Time (yrs)")
+    plt.ylabel("Energy (J)", fontsize=14)
+    plt.xlabel("Time (yrs)", fontsize=14)
     plt.legend(loc='best')
     plt.savefig('Graphs/Graph of Energy MG for group '+l+' NO_'+Q+'.png', bbox_inches='tight')
 
     plt.figure()
     plt.plot(Time, Esum[k, :])
-    plt.xlabel("Time (yrs)")
-    plt.ylabel("Energy (J)")
+    plt.xlabel("Time (yrs)", fontsize=14)
+    plt.ylabel("Energy (J)", fontsize=14)
     plt.savefig('Graphs/Graph of Total energy of system for group '+l+' NO_'+Q+'.png', bbox_inches='tight')
 
 plt.show()
