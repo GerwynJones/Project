@@ -5,17 +5,19 @@ Created on Thu Nov 24 22:29:44 2016
 @author: Admin
 """
 from __future__ import division
-import numpy as np 
-import math
+import numpy as np
 import scipy.constants as sc
 from numpy import linalg as LA
 # import h5py
+
+from Kroupa_IMF import *
 
 ###############################################
 
 # Defining Variables
 # Size
 AU = sc.astronomical_unit
+G = sc.gravitational_constant
 PC = 206265*AU
 R = 200*AU
 
@@ -23,100 +25,22 @@ R = 200*AU
 Ng = 10
 
 # Dumping Number
-Dump = 25
+Dump = 60
 
 # Duration
 Year = sc.Julian_year
-t_max = 1e6*Year; t = 0; dt_max = 1.5*Year
+t_max = 1e6*Year; t = 0; dt_max = 2*Year
 
 # Initial Conditions
 # Constants
-e = 0.05*AU; eta = 5
+e = 0.01*AU; eta = 25
 
 # Type
 Virial = 1/2
+Cold = Virial/2
+Hot = Virial*2
 
 ############################################
-
-def Salpeter(N, alpha, M_min, M_max):
-    # Convert limits from M to logM.
-    log_M_Min = math.log(M_min, 10)
-    log_M_Max = math.log(M_max, 10)
-
-    C = 1.35
-
-    # Since Salpeter IMF decays, maximum likelihood occurs at M_min
-    maxm = math.pow(M_min, 1.0 - alpha)/C
-
-    # Prepare array for output masses.
-    MList = []
-
-    while (len(MList) < N):
-        # Draw candidate from logM interval.
-        logM = np.random.uniform(log_M_Min,log_M_Max)
-
-        M = 10**logM
-
-        # Compute likelihood of candidate from Salpeter SMF.
-        likelihood = math.pow(M, 1.0 - alpha)
-        # Random
-        u = np.random.uniform(0.0, maxm)
-
-        if (u < likelihood):
-
-            MList.append(M)
-
-    Mass = np.array(MList)
-
-    return Mass
-
-def Kroupa(N, alpha, M_min, M_max):
-    # Convert limits from M to logM.
-    log_M_Min = math.log(M_min, 10)
-    log_M_Max = math.log(M_max, 10)
-
-    alpha_1 = alpha[0]
-    alpha_2 = alpha[1]
-
-    C_1 = 0.35
-    C_2 = 1.35
-
-    # Since Kroupa IMF decays, maximum likelihood occurs at M_min
-    maxm_1 = math.pow(M_min, 1.0 - alpha_1)/C_1
-    maxm_2 = math.pow(M_min + 0.02, 1.0 - alpha_2)/C_2
-
-    # Prepare array for output masses.
-    MList = []
-
-    while (len(MList) < N):
-        # Draw candidate from logM interval.
-        logM = np.random.uniform(log_M_Min,log_M_Max)
-
-        M = 10**logM
-
-        if M <= 0.5:
-            # Compute likelihood of candidate from Kroupa IMF.
-            likelihood = math.pow(M, 1.0 - alpha_1)
-            # Random
-            u = np.random.uniform(0.0, maxm_1)
-
-            if (u < likelihood):
-
-                MList.append(M)
-
-        if M > 0.5:
-            # Compute likelihood of candidate from Kroupa IMF.
-            likelihood = math.pow(M, 1.0 - alpha_2)
-            # Random
-            u = np.random.uniform(0.0, maxm_2)
-
-            if (u < likelihood):
-
-                MList.append(M)
-
-    Mass = np.array(MList)
-
-    return Mass
 
 def M(N, Method):
 
@@ -219,8 +143,7 @@ def GroupV(Ng):
 def PE(Pos, Mass, e, N):
     
     Pe = np.zeros(N)
-    G = sc.gravitational_constant    
-    
+
     for i in xrange(0, N - 1):
         for j in xrange(i + 1, N):     
             
@@ -237,7 +160,7 @@ def KE(Vel, Mass, N):
     
     for i in xrange(0, N):
         modv = LA.norm(Vel[i])
-        Ke[i] = .5*Mass[i]*modv**2
+        Ke[i] = 0.5*Mass[i]*modv**2
 
     return Ke
   
@@ -249,9 +172,9 @@ def NormV(Vel, Pos, Mass, N, Type):
     
     Ktot = np.sum(KE(Vel, Mass, N))
     
-    Tot = Ktot/(Ptot*Type)
+    Tot = (Ptot*Type)/Ktot
     
-    V = Vel/np.sqrt(Tot)
+    V = Vel*np.sqrt(Tot)
     
     return V
 
@@ -261,10 +184,10 @@ def IC(Ns, Ng, N, R, GroupPos, Method, Type):
     """ Creating the initial conditions with random points within a cylinder """    
     
     Pos = np.zeros((Ns, 3))
+    Mass = np.zeros(Ns)
     V = []
     K = []
     P = []
-    Mass = np.zeros(Ns)
     
     O = -1
     
@@ -315,7 +238,7 @@ def IC(Ns, Ng, N, R, GroupPos, Method, Type):
         
         V.append(Velf)
     
-    return Pos, V, Mass, K, P
+    return Pos, V, Mass, K, P, Type
         
 
 def IV(V, Ng, Ns, N):
@@ -338,64 +261,9 @@ def IV(V, Ng, Ns, N):
  
 GroupPos, Ns, N = GroupP(Ng)
 
-Pos, V, Mass, KinE, PotE = IC(Ns, Ng, N, R, GroupPos, Kroupa, Virial)
+Pos, V, Mass, KinE, PotE, Type = IC(Ns, Ng, N, R, GroupPos, Kroupa, Virial)
 
 Vel = IV(V, Ng, Ns, N)
-
-
-# Dumping Data into Files
-
-# File No.
-
-# Q = str( 1 )
-#
-# # Position
-# with h5py.File('IC_No'+Q+'/Position_No'+Q+'.h5', 'w') as hf:
-#    hf.create_dataset("Position_Data",  data=Pos)
-#
-# # Velocity
-# with h5py.File('IC_No'+Q+'/Velocity_No'+Q+'.h5', 'w') as hf:
-#    hf.create_dataset("Velocity_Data",  data=Vel)
-#    
-# # Mass
-# with h5py.File('IC_No'+Q+'/Mass_No'+Q+'.h5', 'w') as hf:
-#   hf.create_dataset("Mass_Data",  data=Mass)
-#
-# # N
-# with h5py.File('IC_No'+Q+'/N_No'+Q+'.h5', 'w') as hf:
-#   hf.create_dataset("N_Data",  data=N)
-#
-# # NGroup
-# with open('IC_No'+Q+'/Ng_No'+Q+'.txt', 'w') as f:
-#  f.write('%d' % Ng)
-#
-# # Ns
-# with open('IC_No'+Q+'/Ns_No'+Q+'.txt', 'w') as f:
-#  f.write('%d' % Ns)
-#
-# # Dump
-# with open('IC_No'+Q+'/Dump_No'+Q+'.txt', 'w') as f:
-#  f.write('%d' % Dump)
-#
-# # T_max
-# with open('IC_No'+Q+'/Tmax_No'+Q+'.txt', 'w') as f:
-#  f.write('%d' % t_max)
-#
-# # T
-# with open('IC_No'+Q+'/t_No'+Q+'.txt', 'w') as f:
-#  f.write('%d' % t)
-#
-# # dT
-# with open('IC_No'+Q+'/dT_No'+Q+'.txt', 'w') as f:
-#  f.write('%d' % dt_max)
-#
-# # eta
-# with open('IC_No'+Q+'/eta_No'+Q+'.txt', 'w') as f:
-#  f.write('%f' % eta)
-#
-# # e
-# with open('IC_No'+Q+'/e_No'+Q+'.txt', 'w') as f:
-#  f.write('%d' % e)
 
 
 
